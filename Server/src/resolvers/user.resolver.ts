@@ -2,10 +2,11 @@ import { Arg, Field, Mutation, ObjectType, Query, Resolver, ID, Ctx, Authorized 
 import { User } from '../entity/User';
 import { userInput } from "./types/user.input";
 import { compare, hash } from "bcrypt";
-import { createAuthToken } from '../utils/auth';
+import { createAuthToken, createRefreshToken } from '../auth/createToken';
 import { MyContext } from '../utils/context.interface';
 import { FieldError } from './types/fieldError.error';
 import { Sucursal } from '../entity/Sucursal';
+import { sendRefreshToken } from '../auth/sendRefreshToken';
 
 @ObjectType()
 class LoginResponse{
@@ -39,7 +40,7 @@ export class UserResolver{
         const user = await User.findOne({relations: ["sucursales"], where:{id: userId}})
         return user?.sucursales
     }
-
+ 
     // @Authorized('admin')
     @Mutation(()=> Boolean)
     async deleteUser(@Arg("data") userId: String){
@@ -72,7 +73,7 @@ export class UserResolver{
         }
     }
     @Query(()=> LoginResponse)
-    async login(@Arg("data") userData: userInput){
+    async login(@Arg("data") userData: userInput, @Ctx() {res}: MyContext){
         const {name} = userData
         const user = await User.findOne({name})
         if(!user){
@@ -92,10 +93,10 @@ export class UserResolver{
                    }]
             }
         }
-        const authToken = createAuthToken(user)
-        
+        sendRefreshToken(res, createRefreshToken(user));
+
         return {
-            authToken,
+            authToken: createAuthToken(user),
             user
         }
     }
