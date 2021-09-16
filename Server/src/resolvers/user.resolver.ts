@@ -1,16 +1,16 @@
 import { Arg, Field, Mutation, ObjectType, Query, Resolver, ID, Ctx, Authorized } from 'type-graphql';
 import { User } from '../entity/User';
-import { userInput } from "./types/user.input";
+import { partialUserInput, userInput } from "./types/user.input";
 import { compare, hash } from "bcrypt";
 import { createAuthToken, createRefreshToken } from '../auth/createToken';
 import { MyContext } from '../utils/context.interface';
-import { FieldError } from './types/fieldError.error';
-import { Sucursal } from '../entity/Sucursal';
+import { baseResponse } from '../baseTypes/baseResponse.response';
 import { sendRefreshToken } from '../auth/sendRefreshToken';
-import { Role } from '../enums/role.enum';
+import { createBaseResolver } from '../baseTypes/baseResolver.resolver';
+import { SucursalesResponse } from './sucursal.resolver';
 
 @ObjectType()
-class LoginResponse{
+class LoginResponse extends baseResponse{
     @Field()
     authToken: String
 
@@ -19,40 +19,58 @@ class LoginResponse{
 }
 
 @ObjectType()
-class UserResponse {
-  @Field(() => [FieldError], { nullable: true })
-  errors?: FieldError[];
-
+class UserResponse extends baseResponse {
   @Field(() => User, { nullable: true })
-  user?: User;
+  data?: User;
 }
 
+@ObjectType()
+class UsersResponse extends baseResponse {
+  @Field(() => [User], { nullable: true })
+  data?: User[];
+}
+
+const UserBaseResolver = createBaseResolver(
+    "User",
+    UsersResponse,
+    User
+)
+
+
 @Resolver()
-export class UserResolver{
-
-    @Authorized(Role.Admin)
-    @Query(() => [User])
-    async users() {
-        return await User.find()
-    }
-    @Authorized(Role.Admin)
-    @Query(() => [Sucursal])
-    async getSucursalesOfUser(@Arg("data") userId: String) {
-        const user = await User.findOne({relations: ["sucursales"], where:{id: userId}})
-        return user?.sucursales
-    }
- 
-    @Authorized(Role.Admin)
-    @Mutation(()=> Boolean)
-    async deleteUser(@Arg("data") userId: String){
-        const user = await User.findOne({where:{id:userId}})
-        if(user){
-            await user.remove()
-            return true
+export class UserResolver extends UserBaseResolver{
+    @Authorized()
+    @Query(() => UserResponse)
+    async getMyUser(@Ctx() {payload}: MyContext){
+        try {
+            const user = await User.findOne(payload!.id)
+            return {data: user}
+        } catch (error) {
+            return {
+                errors: [{
+                    field: "GetMyInfo",
+                    message: "Error"
+                }]
+            }
         }
-        return false
     }
+    @Authorized()
+    @Query(() => SucursalesResponse)
+    async getMySucursales(@Ctx() {payload}: MyContext) {
+        try{
+            const {id} = payload!
+            const user = await User.findOne(id,{relations: ["sucursales"]})
+            return {data: user?.sucursales}
+        }catch(err){
+            return {
+                errors: [{
+                    field: "getMySucursales",
+                    message: "Error"
+                }]
+            }
+        }
 
+    }
     @Mutation(() => UserResponse)
     async register(@Arg("data") userData: userInput){
         try{
@@ -62,25 +80,25 @@ export class UserResolver{
                 name: userData.name,
                 password: hashPassword
             }).save()
-            return {user}
+            return {data: user}
 
         }catch(err){
             return {
                 errors: [{
-                    field: "name",
-                    message: "register failed"
+                    field: "form_register",
+                    message: "El nombre de usario está en uso"
                    }]
             }
         }
     }
-    @Query(()=> LoginResponse)
+    @Mutation(()=> LoginResponse)
     async login(@Arg("data") userData: userInput, @Ctx() {res}: MyContext){
         const {name} = userData
         const user = await User.findOne({name})
         if(!user){
             return {
                 errors: [{
-                    field: "all",
+                    field: "form_login",
                     message: "Las credenciales no coinciden"
                    }]
             }
@@ -89,7 +107,7 @@ export class UserResolver{
         if(!isCorrectPassword){
             return {
                 errors: [{
-                    field: "all",
+                    field: "form_login",
                     message: "Las credenciales no coinciden"
                    }]
             }
@@ -99,6 +117,47 @@ export class UserResolver{
         return {
             authToken: createAuthToken(user),
             user
+        }
+    }
+
+    @Mutation(() => Boolean)
+    async logout(@Ctx() { res }: MyContext) {
+      sendRefreshToken(res, "");
+      return true;
+    }
+
+    @Authorized()
+    @Mutation(() => Boolean)
+    async deleteMyUser(@Ctx() {res, payload}: MyContext){
+        sendRefreshToken(res, "");
+        try {
+            const result = await User.delete(payload!.id)
+            return result.affected
+        }catch(err){
+            return false
+        }
+    }
+
+    @Authorized()
+    @Mutation(()=> Boolean)
+    async updateMyUser(
+        @Ctx() {payload}: MyContext,
+        @Arg('data') args: partialUserInput,
+        ){
+        try{
+            const {id} = payload!
+            const user = await User.findOne(id)
+            if(!user){
+                return false
+            }
+            if(args.password){
+                const hashPassword = await hash(args.password, 12)
+                args.password = hashPassword
+            }
+            const result = await User.update(id, {...args})
+            return result.affected
+        }catch(err){
+            return false
         }
     }
 }

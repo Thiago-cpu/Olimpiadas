@@ -1,42 +1,69 @@
-import { Arg, Mutation, Resolver, ObjectType, Field } from 'type-graphql';
+import { Arg, Mutation, Resolver, ObjectType, Field, Authorized, Query, Ctx } from 'type-graphql';
 import { Sucursal } from '../entity/Sucursal';
-import { sucursalInput } from "./types/sucursal.input";
+import { sucursalInput } from './types/sucursal.input';
 import { User } from '../entity/User';
-import { FieldError } from './types/fieldError.error';
+import { Role } from '../enums/role.enum';
+import { createBaseResolver } from '../baseTypes/baseResolver.resolver';
+import { baseResponse } from '../baseTypes/baseResponse.response';
+
 
 @ObjectType()
-class SucursalResponse {
-  @Field(() => [FieldError], { nullable: true })
-  errors?: FieldError[];
-
+class SucursalResponse extends baseResponse {
   @Field(() => Sucursal, { nullable: true })
-  sucursal?: Sucursal;
+  data?: Sucursal;
 }
 
+@ObjectType()
+export class SucursalesResponse extends baseResponse {
+  @Field(() => [Sucursal], { nullable: true })
+  data?: Sucursal[];
+}
+const SucursalBaseResolver = createBaseResolver(
+    "Sucursal",
+    SucursalesResponse,
+    Sucursal
+)
 @Resolver()
-export class SucursalResolver{
+export class SucursalResolver extends SucursalBaseResolver{
 
-    //@Authorized(['Admin'])
+    @Authorized(Role.Admin)
     @Mutation(()=> SucursalResponse)
     async addSucursal(@Arg("data") sucursalData: sucursalInput){
         const encargado = await User.findOne(sucursalData.encargadoId)
         if(!encargado){
             return {errors: [{
-                field: "user",
-                message: "not found"
+                field: "form_NuevaSucursal",
+                message: "Usuario no encontrado"
             }]}
         }
-        const issetSucursal = await Sucursal.findOne({where:{name: sucursalData.name}})
+        const issetSucursal = await Sucursal.findOne({name: sucursalData.name})
         if(issetSucursal){
             return {errors: [{
-                field: "sucursal",
-                message: "name already taken"
+                field: "form_NuevaSucursal",
+                message: "El nombre ya es usado"
             }]}
         }
         const sucursal = await Sucursal.create({
             ...sucursalData,
             encargado
         }).save()
-        return {sucursal}
+        return {data: [sucursal]}
+    }
+
+    @Authorized(Role.Admin)
+    @Query(()=> SucursalesResponse)
+    async getSucursalesOfUser(@Arg("userId") userId: string){
+        const user = await User.findOne(userId,{relations:["sucursales"]})
+        if(!user){
+            return {errors: [
+                {
+                    field: "getSucursalesOfUser",
+                    message: "user not found"
+                }
+            ]}
+        }
+        const sucursales = user.sucursales
+        console.log(sucursales)
+        return {data: sucursales}
     }
 }

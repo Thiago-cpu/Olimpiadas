@@ -1,17 +1,13 @@
 import {ObjectType, Field, Int, ID} from 'type-graphql'
 import {Column, PrimaryGeneratedColumn, Entity, PrimaryColumn, In, BaseEntity, ManyToOne, OneToMany} from 'typeorm'
-import UUID from 'graphql-type-uuid'
 import { User } from './User';
 import { Sensor } from './Sensor';
 import { Movimiento } from './Movimiento';
+import { BaseModel } from '../baseTypes/BaseModel';
 
 @ObjectType()
 @Entity()
-export class Sucursal extends BaseEntity {
-    @Field(type => UUID)
-    @PrimaryGeneratedColumn('uuid')
-    readonly id: string;
-
+export class Sucursal extends BaseModel {
     @Field()
     @Column({length: 20, unique: true})
     name: string;

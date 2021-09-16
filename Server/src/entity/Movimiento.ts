@@ -1,16 +1,13 @@
 import {ObjectType, Field, Int, ID} from 'type-graphql'
 import {Column, PrimaryGeneratedColumn, Entity, PrimaryColumn, In, BaseEntity, ManyToOne, CreateDateColumn} from 'typeorm'
 import { MovimientoEnum } from '../enums/movimiento.enum';
-import UUID from 'graphql-type-uuid'
 import { Sucursal } from './Sucursal';
+import { BaseModel } from '../baseTypes/BaseModel';
+
 
 @ObjectType()
 @Entity()
-export class Movimiento extends BaseEntity {
-    @Field(() => UUID)
-    @PrimaryGeneratedColumn('uuid')
-    readonly id: string;
-
+export class Movimiento extends BaseModel {
     @Field()
     @CreateDateColumn({type: "datetime"})
     createdAt: Date;

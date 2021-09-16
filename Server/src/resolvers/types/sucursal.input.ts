@@ -1,8 +1,10 @@
-import { Length, maxLength } from "class-validator";
+import { IsOptional, Length, maxLength } from "class-validator";
+import { Parser } from "graphql/language/parser";
 import { Field, InputType, Int } from "type-graphql";
+import { Sucursal } from '../../entity/Sucursal';
 
 @InputType()
-export class sucursalInput{
+export class sucursalInput implements Partial<Sucursal>{
     @Length(3,20)
     @Field()
     name: string
