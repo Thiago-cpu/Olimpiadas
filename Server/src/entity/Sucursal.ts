@@ -13,7 +13,7 @@ export class Sucursal extends BaseEntity {
     readonly id: string;
 
     @Field()
-    @Column()
+    @Column({length: 20, unique: true})
     name: string;
 
     @Field(() => Int)
@@ -25,14 +25,14 @@ export class Sucursal extends BaseEntity {
     localizacion: string;
 
     @Field(() => User)
-    @ManyToOne(()=> User, user => user.sucursales, {nullable: false})
+    @ManyToOne(()=> User, user => user.sucursales, {nullable: false, cascade: true, onDelete: 'CASCADE'}, )
     encargado: User
 
-    @Field(() => [Sensor])
+    @Field(() => [Sensor], {nullable: true})
     @OneToMany(() => Sensor, sensor => sensor.sucursal)
     sensores: Sensor[]
 
-    @Field(() => [Movimiento])
+    @Field(() => [Movimiento], {nullable: true})
     @OneToMany(() => Movimiento, movimiento => movimiento.sucursal)
     movimientos: Movimiento[]
 }

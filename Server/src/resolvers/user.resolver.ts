@@ -1,9 +1,11 @@
 import { Arg, Field, Mutation, ObjectType, Query, Resolver, ID, Ctx, Authorized } from 'type-graphql';
 import { User } from '../entity/User';
-import { userInput } from "./types/user/user.input";
+import { userInput } from "./types/user.input";
 import { compare, hash } from "bcrypt";
 import { createAuthToken } from '../utils/auth';
 import { MyContext } from '../utils/context.interface';
+import { FieldError } from './types/fieldError.error';
+import { Sucursal } from '../entity/Sucursal';
 
 @ObjectType()
 class LoginResponse{
@@ -13,15 +15,6 @@ class LoginResponse{
     @Field(() => User)
     user: User
 }
-
-@ObjectType()
-class FieldError {
-  @Field()
-  field: string;
-  @Field()
-  message: string;
-}
-
 
 @ObjectType()
 class UserResponse {
@@ -39,6 +32,23 @@ export class UserResolver{
     // @Authorized('admin')
     async users(@Ctx() ctx: MyContext) {
         return await User.find()
+    }
+    @Query(() => [Sucursal])
+    // @Authorized('admin')
+    async getSucursalesOfUser(@Arg("data") userId: String) {
+        const user = await User.findOne({relations: ["sucursales"], where:{id: userId}})
+        return user?.sucursales
+    }
+
+    // @Authorized('admin')
+    @Mutation(()=> Boolean)
+    async deleteUser(@Arg("data") userId: String){
+        const user = await User.findOne({where:{id:userId}})
+        if(user){
+            await user.remove()
+            return true
+        }
+        return false
     }
 
     @Mutation(() => UserResponse)

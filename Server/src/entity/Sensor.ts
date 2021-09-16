@@ -11,11 +11,11 @@ export class Sensor extends BaseEntity {
     @PrimaryColumn()
     id: string;
 
-    @Field(type => MovimientoEnum)
+    @Field(type => MovimientoEnum,{defaultValue: MovimientoEnum.Ingreso})
     @Column({type: 'enum', enum: MovimientoEnum})
     type: MovimientoEnum
 
-    @Field(() => Sucursal)
+    @Field(() => Sucursal,{nullable: true})
     @ManyToOne(() => Sucursal, sucursal => sucursal.sensores)
     sucursal: Sucursal
 }

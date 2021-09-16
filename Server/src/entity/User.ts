@@ -12,9 +12,9 @@ export class User extends BaseEntity {
     readonly id: string;
 
     @Field()
-    @Column({unique: true})
+    @Column({unique: true, length: 15})
     name: string;
-
+    
     @Column()
     password: string;
 
@@ -22,7 +22,7 @@ export class User extends BaseEntity {
     @Column({type: 'enum', enum: Role, default: Role.Encargado })
     role: Role
 
-    @Field(() => [Sucursal])
+    @Field(() => [Sucursal], {nullable: true})
     @OneToMany(()=> Sucursal, sucursal => sucursal.encargado)
     sucursales: Sucursal[]
 }
