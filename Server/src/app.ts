@@ -7,6 +7,7 @@ import { User } from './entity/User';
 import { sendRefreshToken } from './auth/sendRefreshToken';
 import { createAuthToken, createRefreshToken } from './auth/createToken';
 import cookieParser from 'cookie-parser';
+import { authChecker } from './auth/authChecker';
 
 const PORT = 4000
 
@@ -42,10 +43,28 @@ export async function startServer(){
     const apolloServer = new ApolloServer({
         schema: await buildSchema({
             resolvers: [__dirname + "/resolvers/**/*.resolver.{ts,js}"],
-            dateScalarMode: "isoDate"
+            dateScalarMode: "isoDate",
+            authChecker
         }),
         debug: process.env.mode !== 'production',
-        context: ({ req, res }) => ({ req, res })
+        context: async({ req, res }) => {
+            const authorization = req.headers["authorization"] 
+            if(!authorization){
+                return ({req, res})
+            }
+            try{
+                const payload: any = verify(authorization.split(' ')[1], process.env.AUTH_SECRET!)
+                const user = await User.findOne({id: payload.id})
+                if(!user){
+                    return ({req, res})
+                }
+                payload.role = user.role
+                return ({ req, res, payload })
+
+            }catch(err){
+                return ({req, res})
+            }
+        }
     })
 
     await apolloServer.start();

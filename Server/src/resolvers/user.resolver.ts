@@ -7,6 +7,7 @@ import { MyContext } from '../utils/context.interface';
 import { FieldError } from './types/fieldError.error';
 import { Sucursal } from '../entity/Sucursal';
 import { sendRefreshToken } from '../auth/sendRefreshToken';
+import { Role } from '../enums/role.enum';
 
 @ObjectType()
 class LoginResponse{
@@ -29,19 +30,19 @@ class UserResponse {
 @Resolver()
 export class UserResolver{
 
+    @Authorized(Role.Admin)
     @Query(() => [User])
-    // @Authorized('admin')
-    async users(@Ctx() ctx: MyContext) {
+    async users() {
         return await User.find()
     }
+    @Authorized(Role.Admin)
     @Query(() => [Sucursal])
-    // @Authorized('admin')
     async getSucursalesOfUser(@Arg("data") userId: String) {
         const user = await User.findOne({relations: ["sucursales"], where:{id: userId}})
         return user?.sucursales
     }
  
-    // @Authorized('admin')
+    @Authorized(Role.Admin)
     @Mutation(()=> Boolean)
     async deleteUser(@Arg("data") userId: String){
         const user = await User.findOne({where:{id:userId}})
