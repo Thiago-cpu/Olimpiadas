@@ -6,3 +6,8 @@ export class FieldError {
   @Field()
   message: string;
 }
+@ObjectType()
+export class baseResponse {
+  @Field(() => [FieldError], { nullable: true })
+  errors?: FieldError[];
+}
