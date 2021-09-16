@@ -6,7 +6,6 @@ export interface MyContext {
   res: Response;
   payload?: { 
     id: string,
-    name: string,
     role: Role
   };
 }
