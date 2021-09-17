@@ -4,7 +4,7 @@ import { User } from "../entity/User";
 export const createAuthToken = (user: User) => {
     const {id} = user
     return  sign({id}, process.env.AUTH_SECRET!,{
-              expiresIn: '15m'
+              expiresIn: '4h'
             })
 }
 export const createRefreshToken = (user: User) => {
