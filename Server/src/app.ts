@@ -47,25 +47,7 @@ export async function startServer(){
             authChecker
         }),
         debug: process.env.mode !== 'production',
-        context: async({ req, res }) => {
-            const authorization = req.headers["authorization"] 
-            if(!authorization){
-                return ({req, res})
-            }
-            try{
-                const payload: any = verify(authorization.split(' ')[1], process.env.AUTH_SECRET!)
-                console.log("hola")
-                const user = await User.findOne({id: payload.id})
-                if(!user){
-                    return ({req, res})
-                }
-                payload.role = user.role
-                return ({ req, res, payload })
-
-            }catch(err){
-                return ({req, res})
-            }
-        }
+        context: ({ req, res }) => ({ req, res })
     })
 
     await apolloServer.start();
