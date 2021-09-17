@@ -1,5 +1,6 @@
 import { ClassType, Resolver, Query, Arg, Int, Authorized, ObjectType, Field, Mutation } from 'type-graphql';
 import { Role } from '../enums/role.enum';
+import { newError } from '../utils/newError';
 
 export function createBaseResolver<X extends ClassType >(
     suffix: string,
@@ -17,10 +18,7 @@ export function createBaseResolver<X extends ClassType >(
             console.log(result)
             return {data: result}
         }catch(err){
-            return {errors: [{
-                field: `getAll${suffix}`,
-                message: "Error"
-            }]}
+            return newError(`getAll${suffix}`, "Error")
         }
       }
       @Authorized(Role.Admin)
@@ -30,12 +28,7 @@ export function createBaseResolver<X extends ClassType >(
             const result = await entity.delete(id)
             return result.affected
         }catch(err){
-            return {
-                errors: [{
-                    field: `delete${suffix}`,
-                    message: "Error"
-                }]
-            }
+            return newError(`delete${suffix}`, "Error")
         }
       }
     }

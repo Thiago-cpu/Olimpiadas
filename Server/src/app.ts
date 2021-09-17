@@ -54,6 +54,7 @@ export async function startServer(){
             }
             try{
                 const payload: any = verify(authorization.split(' ')[1], process.env.AUTH_SECRET!)
+                console.log("hola")
                 const user = await User.findOne({id: payload.id})
                 if(!user){
                     return ({req, res})

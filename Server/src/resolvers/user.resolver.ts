@@ -7,15 +7,15 @@ import { MyContext } from '../utils/context.interface';
 import { baseResponse } from '../baseTypes/baseResponse.response';
 import { sendRefreshToken } from '../auth/sendRefreshToken';
 import { createBaseResolver } from '../baseTypes/baseResolver.resolver';
-import { SucursalesResponse } from './sucursal.resolver';
+import { newError } from '../utils/newError';
 
 @ObjectType()
 class LoginResponse extends baseResponse{
-    @Field()
-    authToken: String
+    @Field(() => String, {nullable: true})
+    authToken?: String
 
-    @Field(() => User)
-    user: User
+    @Field(() => User, {nullable: true})
+    data?: User
 }
 
 @ObjectType()
@@ -41,57 +41,26 @@ const UserBaseResolver = createBaseResolver(
 export class UserResolver extends UserBaseResolver{
     @Authorized()
     @Query(() => UserResponse)
-    async getMyUser(@Ctx() {payload}: MyContext){
-        try {
-            const user = await User.findOne(payload!.id)
-            return {data: user}
-        } catch (error) {
-            return {
-                errors: [{
-                    field: "GetMyInfo",
-                    message: "Error"
-                }]
-            }
-        }
-    }
-    @Authorized()
-    @Query(() => SucursalesResponse)
-    async getMySucursales(@Ctx() {payload}: MyContext) {
+    async me(@Ctx() {payload}: MyContext){
         try{
             const {id} = payload!
             const user = await User.findOne(id,{relations: ["sucursales"]})
-            return {data: user?.sucursales}
+            return {data: user}
         }catch(err){
-            return {
-                errors: [{
-                    field: "getMySucursales",
-                    message: "Error"
-                }]
-            }
+            return newError("getMySucursales", "Error")
         }
-
     }
     @Mutation(() => UserResponse)
     async register(@Arg("data") userData: userInput){
         try{
             const userExists = await User.findOne({name: userData.name})
             if(userExists){
-                return {
-                    errors: [{
-                        field: "Form",
-                        message: "El nombre ya está en uso"
-                       }]
-                }
+                return newError("Form", "El nombre ya está en uso")
             }
             const user = await User.create(userData).save()
             return {data: user}
         }catch(err){
-            return {
-                errors: [{
-                    field: "Form",
-                    message: "No se ha podido crear el usuario"
-                   }]
-            }
+            return newError("Form", "No se ha podido encontrar el usuario")
         }
     }
     @Mutation(()=> LoginResponse)
@@ -99,21 +68,11 @@ export class UserResolver extends UserBaseResolver{
         const {name} = userData
         const user = await User.findOne({name})
         if(!user){
-            return {
-                errors: [{
-                    field: "form_login",
-                    message: "Las credenciales no coinciden"
-                   }]
-            }
+            return newError("Form", "Las credenciales no coinciden")
         }
         const isCorrectPassword = await compare(userData.password, user.password)
         if(!isCorrectPassword){
-            return {
-                errors: [{
-                    field: "form_login",
-                    message: "Las credenciales no coinciden"
-                   }]
-            }
+            return newError("Form", "Las credenciales no coinciden")
         }
         sendRefreshToken(res, createRefreshToken(user));
 
@@ -131,7 +90,7 @@ export class UserResolver extends UserBaseResolver{
 
     @Authorized()
     @Mutation(() => Boolean)
-    async deleteMyUser(@Ctx() {res, payload}: MyContext){
+    async deleteMe(@Ctx() {res, payload}: MyContext){
         sendRefreshToken(res, "");
         try {
             const result = await User.delete(payload!.id)
@@ -143,7 +102,7 @@ export class UserResolver extends UserBaseResolver{
 
     @Authorized()
     @Mutation(()=> Boolean)
-    async updateMyUser(
+    async updateMe(
         @Ctx() {payload}: MyContext,
         @Arg('data') args: partialUserInput,
         ){
@@ -153,8 +112,13 @@ export class UserResolver extends UserBaseResolver{
             if(!userExists){
                 return false
             }
-            const result = await User.update(id, {...args})
-            return result.affected
+            if(args.password){
+                const hashedPassword = await hash(args.password, 12);
+                userExists.password = hashedPassword
+            }
+            userExists.name = args.name || userExists.name
+            const result = await userExists.save()
+            return true
         }catch(err){
             return false
         }

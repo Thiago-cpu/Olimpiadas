@@ -5,6 +5,7 @@ import { User } from '../entity/User';
 import { Role } from '../enums/role.enum';
 import { createBaseResolver } from '../baseTypes/baseResolver.resolver';
 import { baseResponse } from '../baseTypes/baseResponse.response';
+import { newError } from '../utils/newError';
 
 
 @ObjectType()
@@ -14,7 +15,7 @@ class SucursalResponse extends baseResponse {
 }
 
 @ObjectType()
-export class SucursalesResponse extends baseResponse {
+class SucursalesResponse extends baseResponse {
   @Field(() => [Sucursal], { nullable: true })
   data?: Sucursal[];
 }
@@ -29,25 +30,21 @@ export class SucursalResolver extends SucursalBaseResolver{
     @Authorized(Role.Admin)
     @Mutation(()=> SucursalResponse)
     async addSucursal(@Arg("data") sucursalData: sucursalInput){
+        console.log("1")
         const encargado = await User.findOne(sucursalData.encargadoId)
         if(!encargado){
-            return {errors: [{
-                field: "form_NuevaSucursal",
-                message: "Usuario no encontrado"
-            }]}
+            return newError("Form", "Usuario no encontrado")
         }
+        console.log("2")
         const issetSucursal = await Sucursal.findOne({name: sucursalData.name})
         if(issetSucursal){
-            return {errors: [{
-                field: "form_NuevaSucursal",
-                message: "El nombre ya es usado"
-            }]}
+            return newError("Form", "El nombre ya está siendo utilizado")
         }
         const sucursal = await Sucursal.create({
             ...sucursalData,
             encargado
         }).save()
-        return {data: [sucursal]}
+        return {data: sucursal}
     }
 
     @Authorized(Role.Admin)
@@ -55,12 +52,7 @@ export class SucursalResolver extends SucursalBaseResolver{
     async getSucursalesOfUser(@Arg("userId") userId: string){
         const user = await User.findOne(userId,{relations:["sucursales"]})
         if(!user){
-            return {errors: [
-                {
-                    field: "getSucursalesOfUser",
-                    message: "user not found"
-                }
-            ]}
+            return newError("getSucursalesOfUser", "Usuario no encontrado")
         }
         const sucursales = user.sucursales
         console.log(sucursales)
