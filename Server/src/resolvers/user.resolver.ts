@@ -74,19 +74,22 @@ export class UserResolver extends UserBaseResolver{
     @Mutation(() => UserResponse)
     async register(@Arg("data") userData: userInput){
         try{
-            const {password} = userData
-            const hashPassword = await hash(password, 12)
-            const user = await User.create({
-                name: userData.name,
-                password: hashPassword
-            }).save()
+            const userExists = await User.findOne({name: userData.name})
+            if(userExists){
+                return {
+                    errors: [{
+                        field: "Form",
+                        message: "El nombre ya está en uso"
+                       }]
+                }
+            }
+            const user = await User.create(userData).save()
             return {data: user}
-
         }catch(err){
             return {
                 errors: [{
-                    field: "form_register",
-                    message: "El nombre de usario está en uso"
+                    field: "Form",
+                    message: "No se ha podido crear el usuario"
                    }]
             }
         }
@@ -146,13 +149,9 @@ export class UserResolver extends UserBaseResolver{
         ){
         try{
             const {id} = payload!
-            const user = await User.findOne(id)
-            if(!user){
+            const userExists = await User.findOne(id)
+            if(!userExists){
                 return false
-            }
-            if(args.password){
-                const hashPassword = await hash(args.password, 12)
-                args.password = hashPassword
             }
             const result = await User.update(id, {...args})
             return result.affected
