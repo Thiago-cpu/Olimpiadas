@@ -6,5 +6,6 @@
     "password": "",
     "database": "olimpiadas",
     "entities": ["src/entity/**/*.ts"],
-    "synchronize": true
+    "synchronize": true,
+    "logging": true
 }

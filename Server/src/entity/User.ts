@@ -1,5 +1,5 @@
 import {ObjectType, Field, Int, ID} from 'type-graphql'
-import {Column, PrimaryGeneratedColumn, Entity, PrimaryColumn, In, BaseEntity, ManyToOne, OneToMany, Generated, BeforeInsert} from 'typeorm'
+import {Column, PrimaryGeneratedColumn, Entity, PrimaryColumn, In, BaseEntity, ManyToOne, OneToMany, Generated, BeforeInsert, BeforeUpdate} from 'typeorm'
 import { Role } from '../enums/role.enum';
 import { Sucursal } from './Sucursal';
 import { BaseModel } from '../baseTypes/BaseModel';

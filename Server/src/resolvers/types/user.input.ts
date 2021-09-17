@@ -13,7 +13,7 @@ export class userInput implements Partial<User>{
 }
 
 @InputType()
-export class partialUserInput implements Partial<User>{
+export class partialUserInput implements Partial<userInput>{
     @Length(1,15)
     @Field({nullable: true})
     name?: string
