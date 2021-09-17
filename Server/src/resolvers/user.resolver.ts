@@ -1,6 +1,6 @@
 import { Arg, Field, Mutation, ObjectType, Query, Resolver, ID, Ctx, Authorized } from 'type-graphql';
 import { User } from '../entity/User';
-import { partialUserInput, userInput } from "./types/user.input";
+import { partialUserInput, userInput, adminPartialUserInput } from './types/user.input';
 import { compare, hash } from "bcrypt";
 import { createAuthToken, createRefreshToken } from '../auth/createToken';
 import { MyContext } from '../utils/context.interface';
@@ -8,6 +8,8 @@ import { baseResponse } from '../baseTypes/baseResponse.response';
 import { sendRefreshToken } from '../auth/sendRefreshToken';
 import { createBaseResolver } from '../baseTypes/baseResolver.resolver';
 import { newError } from '../utils/newError';
+import { Role } from '../enums/role.enum';
+import { extractNullProps } from '../utils/extractNullProps';
 
 @ObjectType()
 class LoginResponse extends baseResponse{
@@ -32,6 +34,7 @@ class UsersResponse extends baseResponse {
 
 const UserBaseResolver = createBaseResolver(
     "User",
+    adminPartialUserInput,
     UsersResponse,
     User
 )
@@ -107,18 +110,14 @@ export class UserResolver extends UserBaseResolver{
         @Arg('data') args: partialUserInput,
         ){
         try{
+            const argsNotNull = extractNullProps(args)
+            if(argsNotNull.password){
+                const hashed = await hash(argsNotNull.password, 12)
+                argsNotNull.password = hashed
+            }
             const {id} = payload!
-            const userExists = await User.findOne(id)
-            if(!userExists){
-                return false
-            }
-            if(args.password){
-                const hashedPassword = await hash(args.password, 12);
-                userExists.password = hashedPassword
-            }
-            userExists.name = args.name || userExists.name
-            const result = await userExists.save()
-            return true
+            const result = await User.update(id, argsNotNull)
+            return result.affected
         }catch(err){
             return false
         }

@@ -21,6 +21,7 @@ class SucursalesResponse extends baseResponse {
 }
 const SucursalBaseResolver = createBaseResolver(
     "Sucursal",
+    sucursalInput,
     SucursalesResponse,
     Sucursal
 )
