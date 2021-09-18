@@ -20,10 +20,14 @@ const IndexPage = () => (
 export async function getStaticProps() {
   const apolloClient = initializeApollo()
 
-  await apolloClient.query({
+  try{ await apolloClient.query({
     query: ALL_POSTS_QUERY,
     variables: allPostsQueryVars,
   })
+  }
+  catch{
+    
+  }
 
   return addApolloState(apolloClient, {
     props: {},
