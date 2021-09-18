@@ -19,7 +19,6 @@ export function createBaseResolver<X extends ClassType, Y extends ClassType >(
       async getAll(){
         try{
             const result = await entity.find()
-            console.log(result)
             return {data: result}
         }catch(err){
             return newError(`getAll${suffix}`, "Error")
@@ -50,7 +49,7 @@ export function createBaseResolver<X extends ClassType, Y extends ClassType >(
               }
               const result = await entity.update(id, argsNotNull)
               return result.affected
-          }catch{
+          }catch(err){
               return false
           }
       }

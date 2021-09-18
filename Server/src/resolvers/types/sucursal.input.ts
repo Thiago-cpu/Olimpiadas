@@ -4,7 +4,7 @@ import { Sucursal } from '../../entity/Sucursal';
 
 @InputType()
 export class sucursalInput implements Partial<Sucursal>{
-    @Length(3,20)
+    @Length(3,30)
     @Field()
     name: string
     
@@ -17,4 +17,22 @@ export class sucursalInput implements Partial<Sucursal>{
 
     @Field()
     encargadoId: string
+}
+@InputType()
+export class partialSucursalInput implements Partial<sucursalInput>{
+    @Length(3,30)
+    @Field({nullable: true})
+    name?: string
+
+    @Field(() => Int, {nullable: true})
+    capacidadMaxima?: number
+
+    @Length(3,255)
+    @Field({nullable: true})
+    localizacion?: string
+}
+@InputType()
+export class adminPartialSucursalInput extends partialSucursalInput{
+    @Field({nullable: true})
+    encargado?: string
 }
