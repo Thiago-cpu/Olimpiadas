@@ -1,4 +1,4 @@
-import { Arg, Mutation, Resolver, ObjectType, Field, Authorized, Query, Ctx, Args } from 'type-graphql';
+import { Arg, Mutation, Resolver, ObjectType, Field, Authorized, Query, Ctx, Args, createMethodDecorator } from 'type-graphql';
 import { Sucursal } from '../entity/Sucursal';
 import { sucursalInput, adminPartialSucursalInput, partialSucursalInput } from './types/sucursal.input';
 import { User } from '../entity/User';
@@ -8,6 +8,7 @@ import { baseResponse } from '../baseTypes/baseResponse.response';
 import { newError } from '../utils/newError';
 import { extractNullProps } from '../utils/extractNullProps';
 import { MyContext } from '../utils/context.interface';
+import { isMySucursal } from '../decorators/isMySucursal';
 
 
 @ObjectType()
@@ -60,6 +61,7 @@ export class SucursalResolver extends SucursalBaseResolver{
     }
 
     @Authorized()
+    @isMySucursal()
     @Mutation(() => Boolean)
     async updateMySucursal(
         @Arg("data") args: partialSucursalInput,
@@ -68,17 +70,8 @@ export class SucursalResolver extends SucursalBaseResolver{
     ){
         try{
             const argsNotNull = extractNullProps(args)
-            const userId = payload!.id
-            const user = await User.findOne(userId, {relations: ["sucursales"]})
-            if(!user){
-                return false
-            }
-            if(user.sucursales.some( sucursal => sucursal.id === sucursalId)){
-                console.log("dueño de la sucursal")
-                const result = await Sucursal.update(sucursalId, argsNotNull)
-                return result.affected
-            }
-            return false
+            const result = await Sucursal.update(sucursalId, argsNotNull)
+            return result.affected
         }catch(err){
             return false
         }

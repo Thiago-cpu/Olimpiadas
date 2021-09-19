@@ -8,7 +8,6 @@ import { baseResponse } from '../baseTypes/baseResponse.response';
 import { sendRefreshToken } from '../auth/sendRefreshToken';
 import { createBaseResolver } from '../baseTypes/baseResolver.resolver';
 import { newError } from '../utils/newError';
-import { Role } from '../enums/role.enum';
 import { extractNullProps } from '../utils/extractNullProps';
 
 @ObjectType()
