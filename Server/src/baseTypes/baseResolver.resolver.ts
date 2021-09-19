@@ -15,7 +15,7 @@ export function createBaseResolver<X extends ClassType, Y extends ClassType >(
     @Resolver({ isAbstract: true })
     abstract class BaseResolver {
       @Authorized(Role.Admin)
-      @Query(type => returnType, { name: `getAll${suffix}` })
+      @Query(type => returnType, { name: `all${suffix}` })
       async getAll(){
         try{
             const result = await entity.find()

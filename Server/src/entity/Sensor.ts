@@ -12,11 +12,11 @@ export class Sensor extends BaseModel {
     @Column({unique: true})
     macAdress: string
 
-    @Field(type => MovimientoEnum,{defaultValue: MovimientoEnum.Ingreso})
+    @Field(type => MovimientoEnum)
     @Column({type: 'enum', enum: MovimientoEnum})
     type: MovimientoEnum
 
-    @Field(() => Sucursal,{nullable: true})
+    @Field(() => Sucursal)
     @ManyToOne(() => Sucursal, sucursal => sucursal.sensores)
     sucursal: Sucursal
 }
