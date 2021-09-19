@@ -8,7 +8,7 @@ import { BaseModel } from '../baseTypes/BaseModel';
 @ObjectType()
 @Entity()
 export class Sensor extends BaseModel {
-    @Field(() => String)
+    @Field()
     @Column({unique: true})
     macAdress: string
 
