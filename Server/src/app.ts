@@ -8,12 +8,17 @@ import { sendRefreshToken } from './auth/sendRefreshToken';
 import { createAuthToken, createRefreshToken } from './auth/createToken';
 import cookieParser from 'cookie-parser';
 import { authChecker } from './auth/authChecker';
+import cors from 'cors';
 
 const PORT = 4000
 
 export async function startServer(){
     const app = express();
     app.use(cookieParser())
+    app.use(cors({
+      origin: 'http://localhost:3000',
+      credentials: true
+    }))
     app.post("/refresh_token", async (req, res) => {
         const token = req.cookies.jid;
         if (!token) {
@@ -48,11 +53,12 @@ export async function startServer(){
         }),
         debug: process.env.mode !== 'production',
         context: ({ req, res }) => ({ req, res })
-    })
+        
+    } )
 
     await apolloServer.start();
 
-    apolloServer.applyMiddleware({app})
+    apolloServer.applyMiddleware({app, cors: false});
 
     app.listen(
         PORT,
