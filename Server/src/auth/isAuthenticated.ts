@@ -9,7 +9,7 @@ export const isAuthenticated = async(context: MyContext) => {
       return false
   }
   try{
-      const payload: any = verify(authorization.split(' ')[1], process.env.AUTH_SECRET!)
+      const payload: any = verify(authorization.split(' ')[1], process.env.AUTH_SECRET || 'dev')
       const user = await User.findOne({id: payload.id})
       if(!user){
           return false

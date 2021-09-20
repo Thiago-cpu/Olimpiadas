@@ -80,7 +80,7 @@ export class UserResolver extends UserBaseResolver{
 
         return {
             authToken: createAuthToken(user),
-            user
+            data: {...user}
         }
     }
 
