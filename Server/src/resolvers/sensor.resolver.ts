@@ -12,6 +12,7 @@ class sensorResponse extends baseResponse{
     @Field(type => Sensor, {nullable: true})
     data?: Sensor 
 }
+@ObjectType()
 class sensoresResponse extends baseResponse{
     @Field(type => [Sensor], {nullable: true})
     data?: Sensor[] 

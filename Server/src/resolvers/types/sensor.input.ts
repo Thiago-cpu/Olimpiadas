@@ -10,6 +10,7 @@ export class sensorInput implements Partial<Sensor>{
     @Field(type => MovimientoEnum)
     type: MovimientoEnum
 }
+@InputType()
 export class partialSensorInput implements Partial<sensorInput>{
     @Field({nullable: true})
     macAdress?: string
@@ -17,6 +18,7 @@ export class partialSensorInput implements Partial<sensorInput>{
     @Field(()=> MovimientoEnum, {nullable: true})
     type?: MovimientoEnum
 }
+@InputType()
 export class adminPartialSensorInput extends partialSensorInput{
     @Field({nullable: true})
     sucursal?: string
