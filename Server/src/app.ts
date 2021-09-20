@@ -27,7 +27,7 @@ export async function startServer(){
     
         let payload: any = null;
         try {
-          payload = verify(token, process.env.REFRESH_SECRET!);
+          payload = verify(token, process.env.REFRESH_SECRET || 'dev');
         } catch (err) {
           return res.send({ ok: false, accessToken: "" });
         }
@@ -51,7 +51,7 @@ export async function startServer(){
             dateScalarMode: "isoDate",
             authChecker
         }),
-        debug: process.env.mode !== 'production',
+        debug: process.env.NODE_ENV !== 'production',
         context: ({ req, res }) => ({ req, res })
         
     } )
