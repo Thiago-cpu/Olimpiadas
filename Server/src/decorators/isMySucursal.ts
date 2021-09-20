@@ -1,8 +1,6 @@
 import { ArgsDictionary, createMethodDecorator } from "type-graphql";
 import { MyContext } from '../utils/context.interface';
 import { User } from '../entity/User';
-import { newError } from '../utils/newError';
-import { ApolloError } from "apollo-server-errors";
 
 export function isMySucursal() {
     return createMethodDecorator(async ({ args: {sucursalId}, context }:{args: ArgsDictionary,context: MyContext}, next) => {
