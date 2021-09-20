@@ -34,25 +34,6 @@ export function createBaseResolver<X extends ClassType, Y extends ClassType >(
             return newError(`delete${suffix}`, "Error")
         }
       }
-
-      @Authorized(Role.Admin)
-      @Mutation(()=>Boolean, {name: `update${suffix}`})
-      async update(
-          @Arg('id') id: string,
-          @Arg('data', () => updateType) args: any
-      ){
-          try{
-              const argsNotNull = extractNullProps(args)
-              if(entity === User && argsNotNull.password){
-                  const hashed = await hash(argsNotNull.password, 12)
-                  argsNotNull.password = hashed
-              }
-              const result = await entity.update(id, argsNotNull)
-              return result.affected
-          }catch(err){
-              return false
-          }
-      }
     }
     return BaseResolver 
 }

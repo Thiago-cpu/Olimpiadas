@@ -9,6 +9,7 @@ import { sendRefreshToken } from '../auth/sendRefreshToken';
 import { createBaseResolver } from '../baseTypes/baseResolver.resolver';
 import { newError } from '../utils/newError';
 import { extractNullProps } from '../utils/extractNullProps';
+import { Role } from '../enums/role.enum';
 
 @ObjectType()
 class LoginResponse extends baseResponse{
@@ -119,6 +120,22 @@ export class UserResolver extends UserBaseResolver{
             return result.affected
         }catch(err){
             return false
+        }
+    }
+
+    @Authorized(Role.Admin)
+    @Mutation(() => UserResponse)
+    async changeRole(
+        @Arg('userId') userId: string,
+        @Arg('role') role: Role
+    ){
+        try {
+            const userExist = await User.findOneOrFail(userId)
+            userExist.role = role
+            const result = await userExist.save()
+            return {data: result}
+        } catch (error) {
+            return newError("ChangeRole", "no se pudo cambiar el Rol del usuario")
         }
     }
 }
