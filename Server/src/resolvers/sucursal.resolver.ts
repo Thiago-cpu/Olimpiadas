@@ -32,7 +32,7 @@ export class SucursalResolver extends SucursalBaseResolver{
 
     @Authorized(Role.Admin)
     @Query(()=> SucursalesResponse)
-    async getSucursalesOfUser(@Arg("userId") userId: string){
+    async getSucursalesOfUser(@Arg("userId") userId: string): Promise<SucursalesResponse>{
         try {
             const user = await User.findOne(userId,{relations:["sucursales"]})
             if(!user){
@@ -47,7 +47,7 @@ export class SucursalResolver extends SucursalBaseResolver{
 
     @Authorized(Role.Admin)
     @Mutation(()=> SucursalResponse)
-    async addSucursal(@Arg("data") sucursalData: sucursalInput){
+    async addSucursal(@Arg("data") sucursalData: sucursalInput): Promise<SucursalResponse>{
         try {
             const encargado = await User.findOne(sucursalData.encargadoId)
             if(!encargado){
@@ -75,7 +75,7 @@ export class SucursalResolver extends SucursalBaseResolver{
         @Arg("data") args: updateSucursalInput,
         @Arg("sucursalId") sucursalId: string,
         @Ctx() {payload}: MyContext
-    ){
+    ): Promise<SucursalResponse>{
         try{
             const argsNotNull: updateSucursalInput = extractNullProps(args)
             if(argsNotNull.name){
@@ -100,7 +100,7 @@ export class SucursalResolver extends SucursalBaseResolver{
     async changeEncargado(
         @Arg("userId") userId: string,
         @Arg("sucursalId") sucursalId: string
-    ){
+    ): Promise<SucursalResponse>{
         const sucursalExists = await Sucursal.findOne(sucursalId)
         if(!sucursalExists){
             return newError("changeEncargado", "No se ha encontrado la sucursal")

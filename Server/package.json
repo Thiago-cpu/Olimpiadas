@@ -10,6 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@graphql-tools/schema": "^8.2.0",
     "@types/cookie-parser": "^1.4.2",
     "apollo-server-express": "^3.3.0",
     "bcrypt": "^5.0.1",
@@ -23,6 +24,7 @@
     "jsonwebtoken": "^8.5.1",
     "mysql": "^2.18.1",
     "reflect-metadata": "^0.1.13",
+    "subscriptions-transport-ws": "^0.9.19",
     "type-graphql": "^1.1.1",
     "typeorm": "^0.2.37"
   },

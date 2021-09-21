@@ -31,12 +31,12 @@ export class sensorResolver extends sensorBaseResolver {
     async addSensor(
         @Arg("sucursalId") sucursalId: string,
         @Arg("data") args: sensorInput,
-    ){
+    ): Promise<sensorResponse>{
         try{
             const sucursal = await Sucursal.findOneOrFail(sucursalId)
             const sensorExists = await Sensor.findOne({macAdress: args.macAdress})
             if(sensorExists){
-                return newError("Form", "Ya existe un sensor con esa macAdress")
+                return newError("macAddress", "Ya existe un sensor con esa macAdress")
             }
             const sensor = await Sensor.create({...args, sucursal}).save()
             return {data: sensor}

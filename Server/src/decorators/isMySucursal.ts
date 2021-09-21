@@ -18,4 +18,4 @@ export function isMySucursal() {
             return new Error("Error! No estás autorizado")
         }
     });
-  }
+}

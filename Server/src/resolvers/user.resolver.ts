@@ -43,7 +43,7 @@ const UserBaseResolver = createBaseResolver(
 export class UserResolver extends UserBaseResolver{
     @Authorized()
     @Query(() => UserResponse)
-    async me(@Ctx() {payload}: MyContext){
+    async me(@Ctx() {payload}: MyContext): Promise<UserResponse>{
         try{
             const {id} = payload!
             const user = await User.findOne(id,{relations: ["sucursales"]})
@@ -53,7 +53,7 @@ export class UserResolver extends UserBaseResolver{
         }
     }
     @Mutation(() => UserResponse)
-    async register(@Arg("data") userData: userInput){
+    async register(@Arg("data") userData: userInput): Promise<UserResponse>{
         try{
             const userExists = await User.findOne({name: userData.name})
             if(userExists){
@@ -66,7 +66,7 @@ export class UserResolver extends UserBaseResolver{
         }
     }
     @Mutation(()=> LoginResponse)
-    async login(@Arg("data") userData: userInput, @Ctx() {res}: MyContext){
+    async login(@Arg("data") userData: userInput, @Ctx() {res}: MyContext): Promise<LoginResponse>{
         const {name} = userData
         const user = await User.findOne({name})
         if(!user){
@@ -80,23 +80,23 @@ export class UserResolver extends UserBaseResolver{
 
         return {
             authToken: createAuthToken(user),
-            data: {...user}
+            data: user
         }
     }
 
     @Mutation(() => Boolean)
-    async logout(@Ctx() { res }: MyContext) {
+    async logout(@Ctx() { res }: MyContext): Promise<Boolean> {
       sendRefreshToken(res, "");
       return true;
     }
 
     @Authorized()
     @Mutation(() => Boolean)
-    async deleteMe(@Ctx() {res, payload}: MyContext){
+    async deleteMe(@Ctx() {res, payload}: MyContext): Promise<Boolean>{
         sendRefreshToken(res, "");
         try {
             const result = await User.delete(payload!.id)
-            return result.affected
+            return !!result.affected
         }catch(err){
             return false
         }
@@ -107,7 +107,7 @@ export class UserResolver extends UserBaseResolver{
     async updateMe(
         @Ctx() {payload}: MyContext,
         @Arg('data') args: updateUserInput,
-        ){
+        ): Promise<UserResponse>{
         try{
             const argsNotNull: updateUserInput = extractNullProps(args)
             if(argsNotNull.name){
@@ -136,7 +136,7 @@ export class UserResolver extends UserBaseResolver{
     @Mutation(() => UserResponse)
     async changeRole(
         @Arg('data') args: changeRoleInput
-    ){
+    ): Promise<UserResponse>{
         try {
             const {userId, role} = args
             const userExist = await User.findOneOrFail(userId)
