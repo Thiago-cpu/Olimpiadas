@@ -33,7 +33,7 @@ export class movimientoResolver{
             //el createdAt param no se usa debería de venir por parametro para ser más exacto
             //hay que validar los argumentos en algun input type
             const HardcreatedAt = new Date().toISOString()
-            const cantidadActual = await calcularCantidadActual(existSensor.type)
+            const cantidadActual = await calcularCantidadActual(existSensor.type, existSensor.sucursal.id)
             const result = await Movimiento.create({
                 createdAt: HardcreatedAt,
                 type: existSensor.type,
@@ -46,8 +46,8 @@ export class movimientoResolver{
         }
     }
 }
-const calcularCantidadActual = async(type: MovimientoEnum) => {
-    const move = await Movimiento.findLastMove()
+const calcularCantidadActual = async(type: MovimientoEnum, sucursalId: string) => {
+    const move = await Movimiento.findLastMove(sucursalId)
     let added: number
     if(type === MovimientoEnum.Ingreso){
         added = 1

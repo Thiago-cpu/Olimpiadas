@@ -24,8 +24,9 @@ export class Movimiento extends BaseModel {
     @ManyToOne(() => Sucursal, sucursal => sucursal.movimientos, {nullable: false})
     sucursal: Sucursal
 
-    static findLastMove(){
+    static findLastMove(sucursalId: string){
         return this.createQueryBuilder("move")
+            .where("move.sucursalId = :sucursalId", {sucursalId})
             .orderBy("move.createdAt", "DESC")
             .getOne()
     }
