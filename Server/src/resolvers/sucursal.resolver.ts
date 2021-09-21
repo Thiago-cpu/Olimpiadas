@@ -53,7 +53,7 @@ export class SucursalResolver extends SucursalBaseResolver{
             if(!encargado){
                 return newError("Form", "Usuario no encontrado")
             }
-            const issetSucursal = await Sucursal.findOne(sucursalData.encargadoId, {where: {name: sucursalData.name}})
+            const issetSucursal = await Sucursal.findOne({where: {name: sucursalData.name, encargado: sucursalData.encargadoId}})
             if(issetSucursal){
                 return newError("Form", "El usuario ya tiene una sucursal con ese nombre")
             }
@@ -77,9 +77,9 @@ export class SucursalResolver extends SucursalBaseResolver{
         @Ctx() {payload}: MyContext
     ){
         try{
-            const argsNotNull = extractNullProps(args)
+            const argsNotNull: updateSucursalInput = extractNullProps(args)
             if(argsNotNull.name){
-                const alreadyHas = await Sucursal.findOne({name: argsNotNull.name})
+                const alreadyHas = await Sucursal.findOne({where: {name: argsNotNull.name, encargado: payload!.id}})
                 if(alreadyHas){
                     return newError("updateMySucursal", "Ya tienes una sucursal con ese nombre")
                 }
