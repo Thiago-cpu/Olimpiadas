@@ -1,6 +1,6 @@
 import { Arg, Field, Mutation, ObjectType, Query, Resolver, ID, Ctx, Authorized } from 'type-graphql';
 import { User } from '../entity/User';
-import { partialUserInput, userInput, adminPartialUserInput } from './types/user.input';
+import { updateUserInput, userInput, changeRoleInput } from './types/user.input';
 import { compare, hash } from "bcrypt";
 import { createAuthToken, createRefreshToken } from '../auth/createToken';
 import { MyContext } from '../utils/context.interface';
@@ -9,6 +9,7 @@ import { sendRefreshToken } from '../auth/sendRefreshToken';
 import { createBaseResolver } from '../baseTypes/baseResolver.resolver';
 import { newError } from '../utils/newError';
 import { extractNullProps } from '../utils/extractNullProps';
+import { Role } from '../enums/role.enum';
 
 @ObjectType()
 class LoginResponse extends baseResponse{
@@ -33,7 +34,6 @@ class UsersResponse extends baseResponse {
 
 const UserBaseResolver = createBaseResolver(
     "User",
-    adminPartialUserInput,
     UsersResponse,
     User
 )
@@ -103,22 +103,48 @@ export class UserResolver extends UserBaseResolver{
     }
 
     @Authorized()
-    @Mutation(()=> Boolean)
+    @Mutation(()=> UserResponse)
     async updateMe(
         @Ctx() {payload}: MyContext,
-        @Arg('data') args: partialUserInput,
+        @Arg('data') args: updateUserInput,
         ){
         try{
-            const argsNotNull = extractNullProps(args)
+            const argsNotNull: updateUserInput = extractNullProps(args)
+            if(argsNotNull.name){
+                const userExists = await User.findOne({name: argsNotNull.name})
+                if(userExists){
+                    return newError("Ya existe un usuario con ese nombre")
+                }
+            }
             if(argsNotNull.password){
                 const hashed = await hash(argsNotNull.password, 12)
                 argsNotNull.password = hashed
             }
             const {id} = payload!
             const result = await User.update(id, argsNotNull)
-            return result.affected
+            if(!result.affected){
+                return newError("No se pudo actualizar el usuario")
+            }
+            const userUpdated = await User.findOneOrFail(id)
+            return {data: userUpdated}
         }catch(err){
-            return false
+            return newError("Algo ha salido mal al actualizar el usuario")
+        }
+    }
+
+    @Authorized(Role.Admin)
+    @Mutation(() => UserResponse)
+    async changeRole(
+        @Arg('data') args: changeRoleInput
+    ){
+        try {
+            const {userId, role} = args
+            const userExist = await User.findOneOrFail(userId)
+            userExist.role = role
+            const result = await userExist.save()
+            return {data: result}
+        } catch (error) {
+            return newError("ChangeRole", "no se pudo cambiar el Rol del usuario")
         }
     }
 }

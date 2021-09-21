@@ -47,9 +47,7 @@ export class movimientoResolver{
     }
 }
 const calcularCantidadActual = async(type: MovimientoEnum) => {
-    const move = await Movimiento.createQueryBuilder("move")
-        .orderBy("move.createdAt", "DESC")
-        .getOne()
+    const move = await Movimiento.findLastMove()
     let added: number
     if(type === MovimientoEnum.Ingreso){
         added = 1

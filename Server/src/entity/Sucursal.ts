@@ -9,7 +9,7 @@ import { BaseModel } from '../baseTypes/BaseModel';
 @Entity()
 export class Sucursal extends BaseModel {
     @Field()
-    @Column({length: 30, unique: true})
+    @Column({length: 30})
     name: string;
 
     @Field(() => Int)
