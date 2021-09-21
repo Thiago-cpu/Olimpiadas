@@ -9,7 +9,7 @@ export const isAuthenticated = async(context: MyContext) => {
       return false
   }
   try{
-      const payload: any = verify(authorization.split(' ')[1], process.env.AUTH_SECRET!)
+      const payload: any = await validateToken(authorization)
       const user = await User.findOne({id: payload.id})
       if(!user){
           return false
@@ -21,4 +21,9 @@ export const isAuthenticated = async(context: MyContext) => {
   }catch(err){
       return false
   }
+}
+
+export const validateToken = async(authorization: string) => {
+    const result = verify(authorization.split(' ')[1], process.env.AUTH_SECRET!)
+    return result
 }

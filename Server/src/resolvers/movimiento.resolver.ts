@@ -1,9 +1,10 @@
-import { Arg, Authorized, Field, FieldResolver, Mutation, ObjectType, Resolver, ResolverInterface, Root } from "type-graphql";
+import { Arg, Authorized, Field, FieldResolver, Mutation, ObjectType, Publisher, Resolver, ResolverInterface, Root, Subscription, PubSub, Ctx, Int } from "type-graphql";
 import { baseResponse } from '../baseTypes/baseResponse.response';
 import { Movimiento } from '../entity/Movimiento';
 import { Sensor } from '../entity/Sensor';
 import { newError } from '../utils/newError';
 import { MovimientoEnum } from '../enums/movimiento.enum';
+import { PubSubEngine } from "graphql-subscriptions";
 
 @ObjectType()
 class movimientoResponse extends baseResponse{
@@ -16,13 +17,40 @@ class movimientosResponse extends baseResponse{
     data?: Movimiento[] 
 }
 
+@ObjectType()
+export class Notification {
+  @Field(() => Int, { nullable: true } )
+  cant?: number;
+
+  @Field(() => Boolean, { nullable: true } )
+  isOk?: boolean;
+
+  @Field(type => Date)
+  date: Date;
+}
+
+
 @Resolver(of => Movimiento)
 export class movimientoResolver{
+
+    @Subscription({
+        topics: "MOVIMIENTO",
+      })
+      actualPeople(
+        @Root() message: any,
+        @Arg('sucursalId') sucursalId: string,
+      ): Notification{
+        if(message.sucursalId===sucursalId){
+            return {cant: message.cant, isOk: message.isOk , date: new Date()}
+        }
+        return {date: new Date()}
+    }
     @Mutation(()=> movimientoResponse)
     async addMovimiento(
         @Arg('MacAddress') macAdress: string,
-        @Arg('createdAt') createdAt: Date
-    ){
+        @Arg('createdAt') createdAt: Date,
+        @PubSub() pubSub: PubSubEngine
+    ): Promise<movimientoResponse>{
         try {
             const existSensor = await Sensor.findOne({where: {macAdress}, relations: ["sucursal"]})
             if(!existSensor){
@@ -40,6 +68,8 @@ export class movimientoResolver{
                 sucursal: existSensor.sucursal,
                 cantidadActual
             }).save()
+            const isOk = existSensor.sucursal.capacidadMaxima > cantidadActual
+            await pubSub.publish("MOVIMIENTO", {cant: cantidadActual, sucursalId: existSensor.sucursal.id, isOk});
             return {data: result}
         } catch (err) {
             return newError("Error", "Ha ocurrido un error al añadir el movimiento")
