@@ -14,7 +14,7 @@ export class userInput implements Partial<User>{
 }
 
 @InputType()
-export class partialUserInput implements Partial<userInput>{
+export class updateUserInput implements Partial<userInput>{
 
     @Length(1,15)
     @Field({nullable: true})
@@ -26,9 +26,11 @@ export class partialUserInput implements Partial<userInput>{
 }
 
 @InputType()
-export class adminPartialUserInput extends partialUserInput{
+export class changeRoleInput implements Partial<User>{
+    @Field()
+    userId: string
 
-    @Field(()=>Role, {nullable: true})
-    role?: Role
+    @Field(()=>Role)
+    role: Role
 }
 

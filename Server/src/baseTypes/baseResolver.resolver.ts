@@ -1,13 +1,9 @@
 import { ClassType, Resolver, Query, Arg, Int, Authorized, ObjectType, Field, Mutation } from 'type-graphql';
 import { Role } from '../enums/role.enum';
 import { newError } from '../utils/newError';
-import { extractNullProps } from '../utils/extractNullProps';
-import { hash } from 'bcrypt';
-import { User } from '../entity/User';
 
-export function createBaseResolver<X extends ClassType, Y extends ClassType >(
+export function createBaseResolver<X extends ClassType >(
     suffix: string,
-    updateType: Y,
     returnType: X,
     entity: any
     ) {

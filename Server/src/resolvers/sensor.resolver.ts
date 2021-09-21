@@ -19,7 +19,6 @@ class sensoresResponse extends baseResponse{
 }
 const sensorBaseResolver = createBaseResolver(
     "Sensor",
-    adminPartialSensorInput,
     sensoresResponse,
     Sensor
 )
