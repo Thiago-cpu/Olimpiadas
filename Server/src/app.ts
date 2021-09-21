@@ -12,6 +12,7 @@ import { execute, subscribe } from 'graphql';
 import { ConnectionParams, SubscriptionServer } from 'subscriptions-transport-ws';
 import { createServer } from 'http';
 import { validateToken } from './auth/isAuthenticated';
+import cors from 'cors';
 
 const PORT = 4000
 
@@ -21,6 +22,10 @@ export async function startServer(){
     const httpServer = createServer(app);
 
     app.use(cookieParser())
+    app.use(cors({
+      origin: 'http://localhost:3000',
+      credentials: true
+    }))
     app.post("/refresh_token", async (req, res) => {
         const token = req.cookies.jid;
         if (!token) {
@@ -29,7 +34,7 @@ export async function startServer(){
     
         let payload: any = null;
         try {
-          payload = verify(token, process.env.REFRESH_SECRET!);
+          payload = verify(token, process.env.REFRESH_SECRET || 'dev');
         } catch (err) {
           return res.send({ ok: false, accessToken: "" });
         }
@@ -89,7 +94,7 @@ export async function startServer(){
 
     await apolloServer.start();
 
-    apolloServer.applyMiddleware({app})
+    apolloServer.applyMiddleware({app, cors: false});
 
     app.listen(
         PORT,
