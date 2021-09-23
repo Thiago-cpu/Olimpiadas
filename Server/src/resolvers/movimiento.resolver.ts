@@ -35,16 +35,14 @@ export class movimientoResolver{
 
     @Subscription({
         topics: "MOVIMIENTO",
+        filter: ({ payload, args }) => payload.sucursalId === args.sucursalId
       })
       actualPeople(
         @Root() message: any,
         @Arg('sucursalId') sucursalId: string,
       ): Notification{
-        if(message.sucursalId===sucursalId){
             return {cant: message.cant, isOk: message.isOk , date: new Date()}
         }
-        return {date: new Date()}
-    }
     @Mutation(()=> movimientoResponse)
     async addMovimiento(
         @Arg('MacAddress') macAdress: string,
