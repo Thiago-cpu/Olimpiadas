@@ -14,6 +14,8 @@ import { createServer } from 'http';
 import { validateToken } from './auth/isAuthenticated';
 import cors from 'cors';
 
+//Aguante heroku
+
 const PORT = 4000
 
 export async function startServer(){
