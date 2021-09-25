@@ -1,20 +1,27 @@
 import { useMemo } from 'react'
-import { ApolloClient, HttpLink, InMemoryCache } from '@apollo/client'
+import { ApolloClient, ApolloLink, HttpLink, InMemoryCache } from '@apollo/client'
 import { concatPagination } from '@apollo/client/utilities'
 import merge from 'deepmerge'
 import isEqual from 'lodash/isEqual'
 
 export const APOLLO_STATE_PROP_NAME = '__APOLLO_STATE__'
+const httpLink = new HttpLink({ uri: 'http://localhost:4000/graphql', credentials: 'same-origin'});
 
+const authLink = new ApolloLink((operation, forward) => {
+
+  operation.setContext({
+    headers: {
+      authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjA5MjI2OTYyLWE5Y2QtNGY3Mi04OTg1LTAxYTJiMWU2YjBjYyIsImlhdCI6MTYzMjU0MTAyMywiZXhwIjoxNjMyNTU1NDIzfQ._ibkKpkJcsQzTWju_EzcVL16GrO3W-LZ749GJtEGlqI`
+    }
+  });
+  return forward(operation);
+});
 let apolloClient
 
 function createApolloClient() {
   return new ApolloClient({
     ssrMode: typeof window === 'undefined',
-    link: new HttpLink({
-      uri: 'http://localhost:4000/graphql', // Server URL (must be absolute)
-      credentials: 'same-origin', // Additional fetch() options like `credentials` or `headers`
-    }),
+    link: authLink.concat(httpLink),
     cache: new InMemoryCache({
       typePolicies: {
         Query: {
