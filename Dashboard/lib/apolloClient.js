@@ -11,7 +11,7 @@ const authLink = new ApolloLink((operation, forward) => {
 
   operation.setContext({
     headers: {
-      authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjA5MjI2OTYyLWE5Y2QtNGY3Mi04OTg1LTAxYTJiMWU2YjBjYyIsImlhdCI6MTYzMjU0MTAyMywiZXhwIjoxNjMyNTU1NDIzfQ._ibkKpkJcsQzTWju_EzcVL16GrO3W-LZ749GJtEGlqI`
+      authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Ijc3ZjNkNjJhLTdhYzctNGE1Yy1hM2Y5LTk2MmJkZjgzOGM3ZCIsImlhdCI6MTYzMjYwMDY2OCwiZXhwIjoxNjMyNjE1MDY4fQ.P_lFWWvrX-KTgL-i0c0iBOR8cjYantQ5gb9zpJLz2bU`
     }
   });
   return forward(operation);
