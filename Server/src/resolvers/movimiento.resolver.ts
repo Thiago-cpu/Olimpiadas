@@ -37,12 +37,13 @@ export class movimientoResolver{
         topics: "MOVIMIENTO",
         filter: ({ payload, args }) => payload.sucursalId === args.sucursalId
       })
-      actualPeople(
+    actualPeople(
         @Root() message: any,
         @Arg('sucursalId') sucursalId: string,
       ): Notification{
             return {cant: message.cant, isOk: message.isOk , date: new Date()}
-        }
+    }
+    
     @Mutation(()=> movimientoResponse)
     async addMovimiento(
         @Arg('MacAddress') macAdress: string,
