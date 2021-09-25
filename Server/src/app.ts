@@ -22,10 +22,7 @@ export async function startServer(){
     const httpServer = createServer(app);
 
     app.use(cookieParser())
-    app.use(cors({
-      origin: 'http://localhost:3000',
-      credentials: true
-    }))
+    app.use(cors())
     app.post("/refresh_token", async (req, res) => {
         const token = req.cookies.jid;
         if (!token) {
@@ -74,20 +71,8 @@ export async function startServer(){
     })
 
     const subscriptionServer = SubscriptionServer.create(
-      { schema, execute, subscribe,
-      //   onConnect: async(connectionParams: ConnectionParams) => {
-      //     if (connectionParams.Authorization) {
-      //         const payload: any = await validateToken(connectionParams.Authorization)
-      //         const user = await User.findOne(payload.id)
-      //         if(!user){
-      //           throw new Error('authToken incorrecto!')
-      //         }
-      //     }
-   
-      //     throw new Error('falta authToken!');
-      //  }
-      },
-      { server: httpServer, path: apolloServer.graphqlPath},
+      { schema, execute, subscribe },
+      { server: httpServer, path: apolloServer.graphqlPath },
 
       
     );
@@ -96,12 +81,11 @@ export async function startServer(){
 
     apolloServer.applyMiddleware({app, cors: false});
 
-    app.listen(
-        PORT,
+    app.listen(process.env.PORT || PORT,
         () => console.log(`Server started on http://localhost:${PORT}${apolloServer.graphqlPath}`),
     );
     const PORT2 = 4001;
-    httpServer.listen(PORT2, () =>
+    httpServer.listen(process.env.PORTWSS || PORT2, () =>
       console.log(`wss is now running on http://localhost:${PORT2}/graphql`)
     );
 }
