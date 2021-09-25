@@ -13,6 +13,7 @@ import {
   InputLabel,
   FormControl,
   MenuItem,
+  Container,
   Select
 } from '@mui/material'
 
@@ -21,6 +22,7 @@ import USure from '../components/DeleteUser.modal';
 import { gql, useQuery, useMutation } from '@apollo/client';
 import { initializeApollo, addApolloState } from '../lib/apolloClient'
 import NewSucursal from '../components/NewSucursal.modal';
+import Search from '../components/Search';
 
 
 
@@ -41,7 +43,8 @@ const CHANGE_ROLE = gql`
 `
 
 export default function Users({data}) {
-  const arrRows = data.allUser.data.map(user => {return {name: user.name, id: user.id, role: user.role}})
+  const arrRows = data.allUser.data
+  const users = arrRows.map(user => {return {label: user.name}})
   const [rows, setRows] = React.useState(arrRows)
   const [changeRole, { loading: changeRoleLoading }] = useMutation(CHANGE_ROLE)
 
@@ -52,6 +55,12 @@ export default function Users({data}) {
     }}})
   }
 
+  const handleSearchChange = (data) => {
+    console.log("hola")
+    const newRows = arrRows.filter((row) => row.name.toLowerCase().startsWith(data.toLowerCase()))
+    setRows(newRows)
+  }
+
   const removeRow = (id) => {
     setRows(prevRows => {
       const newRows = prevRows.filter(a => a.id !== id)
@@ -59,7 +68,13 @@ export default function Users({data}) {
     })
   }
   return (
-    <TableContainer sx={{maxWidth: 600, borderRadius: 8}}component={Paper}>
+    <Container sx={{
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center"
+    }}>
+    <Search styles={{}} onChange={handleSearchChange} label="Buscar usuario"/>
+    <TableContainer sx={{maxWidth: 600, borderRadius: 8, marginTop: 1}}component={Paper}>
       <Table size="small" aria-label="a dense table">
         <TableHead>
           <TableRow>
@@ -71,7 +86,8 @@ export default function Users({data}) {
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows.map((row, i) => (
+          {rows.length?
+          rows.map((row, i) => (
             <TableRow
               key={row.id}
               sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
@@ -108,10 +124,16 @@ export default function Users({data}) {
                 <NewSucursal name={row.name} id={row.id}/>
               </TableCell>
             </TableRow>
-          ))}
+          ))
+          :
+          <TableCell variant="footer" colSpan={5}>
+            <p style={{textAlign: "center"}}>Usuario no encontrado.</p>
+          </TableCell >
+        }
         </TableBody>
       </Table>
     </TableContainer>
+    </Container>
   );
 }
 const GET_USERS = gql`
