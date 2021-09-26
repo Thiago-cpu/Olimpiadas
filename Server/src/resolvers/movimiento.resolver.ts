@@ -1,4 +1,4 @@
-import { Arg, Authorized, Field, FieldResolver, Mutation, ObjectType, Publisher, Resolver, ResolverInterface, Root, Subscription, PubSub, Ctx, Int } from "type-graphql";
+import { Arg, Authorized, Field, FieldResolver, Mutation, ObjectType, Publisher, Resolver, ResolverInterface, Root, Subscription, PubSub, Ctx, Int, Query } from "type-graphql";
 import { baseResponse } from '../baseTypes/baseResponse.response';
 import { Movimiento } from '../entity/Movimiento';
 import { Sensor } from '../entity/Sensor';
@@ -22,8 +22,8 @@ export class Notification {
   @Field(() => Int, { nullable: true } )
   cant?: number;
 
-  @Field(() => Boolean, { nullable: true } )
-  isOk?: boolean;
+  @Field(() => Int, { nullable: true } )
+  maxCant?: number;
 
   @Field(type => Date)
   date: Date;
@@ -41,8 +41,19 @@ export class movimientoResolver{
         @Root() message: any,
         @Arg('sucursalId') sucursalId: string,
       ): Notification{
-            return {cant: message.cant, isOk: message.isOk , date: new Date()}
+            return {cant: message.cant, maxCant: message.maxCant , date: new Date()}
     }
+
+    @Query(() => movimientoResponse)
+    async lastMove(@Arg('sucursalId') sucursalId: string): Promise<movimientoResponse>{
+        const lastmove = await Movimiento.findLastMove(sucursalId)
+        console.log({lastmove})
+        if(!lastmove){
+            return newError("sucursal", "La sucursal no existe")
+        }
+        return {data: lastmove}
+    } 
+    
     
     @Mutation(()=> movimientoResponse)
     async addMovimiento(
@@ -67,8 +78,8 @@ export class movimientoResolver{
                 sucursal: existSensor.sucursal,
                 cantidadActual
             }).save()
-            const isOk = existSensor.sucursal.capacidadMaxima > cantidadActual
-            await pubSub.publish("MOVIMIENTO", {cant: cantidadActual, sucursalId: existSensor.sucursal.id, isOk});
+            const maxCant = existSensor.sucursal.capacidadMaxima
+            await pubSub.publish("MOVIMIENTO", {cant: cantidadActual, sucursalId: existSensor.sucursal.id, maxCant});
             return {data: result}
         } catch (err) {
             return newError("Error", "Ha ocurrido un error al añadir el movimiento")
@@ -82,5 +93,6 @@ const calcularCantidadActual = async(type: MovimientoEnum, sucursalId: string) =
         added = 1
     } else added = -1
     let cantidadActual = move?.cantidadActual ? move?.cantidadActual + added : added
+    if(cantidadActual<0) cantidadActual = 0
     return cantidadActual
 }

@@ -28,6 +28,7 @@ export class Movimiento extends BaseModel {
         return this.createQueryBuilder("move")
             .where("move.sucursalId = :sucursalId", {sucursalId})
             .orderBy("move.createdAt", "DESC")
+            .leftJoinAndSelect("move.sucursal", "sucursal")
             .getOne()
     }
 }

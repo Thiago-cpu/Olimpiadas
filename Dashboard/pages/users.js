@@ -56,7 +56,6 @@ export default function Users({data}) {
   }
 
   const handleSearchChange = (data) => {
-    console.log("hola")
     const newRows = arrRows.filter((row) => row.name.toLowerCase().startsWith(data.toLowerCase()))
     setRows(newRows)
   }

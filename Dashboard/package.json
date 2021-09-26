@@ -6,7 +6,7 @@
     "start": "next start"
   },
   "dependencies": {
-    "@apollo/client": "3.1.1",
+    "@apollo/client": "^3.4.13",
     "@blackbox-vision/react-qr-reader": "^5.0.0",
     "@emotion/react": "^11.4.1",
     "@emotion/styled": "^11.3.0",
@@ -22,6 +22,7 @@
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "recharts": "^2.1.4",
+    "subscriptions-transport-ws": "^0.9.19",
     "yup": "^0.32.9"
   },
   "devDependencies": {
