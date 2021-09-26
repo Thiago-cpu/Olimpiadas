@@ -6,9 +6,10 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import { Card, CardContent, CardHeader, List, ListItem, Typography } from '@mui/material';
+import { Button, Card, CardActions, CardContent, CardHeader, List, ListItem, Typography } from '@mui/material';
 import { Box } from '@mui/system';
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import Link from 'next/link'
 
 function createData(
   fecha: string,
@@ -112,6 +113,11 @@ export default function Dashboard() {
             </ListItem>
           </List>
         </CardContent>
+        <CardActions>
+          <Link href='/ingreso'>
+            <Button size="large" component='a'>Ver pantalla de ingreso</Button>
+          </Link>
+        </CardActions>
       </Card>
 
       <Card sx={{flexBasis: '100%', flexGrow: 1}}>
