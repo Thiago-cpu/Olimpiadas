@@ -24,6 +24,6 @@ export const isAuthenticated = async(context: MyContext) => {
 }
 
 export const validateToken = async(authorization: string) => {
-    const result = verify(authorization.split(' ')[1], process.env.AUTH_SECRET!)
+    const result = verify(authorization.split(' ')[1], process.env.AUTH_SECRET || 'dev')
     return result
 }
