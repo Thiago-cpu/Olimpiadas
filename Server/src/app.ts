@@ -11,7 +11,6 @@ import { authChecker } from './auth/authChecker';
 import { execute, subscribe } from 'graphql';
 import { ConnectionParams, SubscriptionServer } from 'subscriptions-transport-ws';
 import { createServer } from 'http';
-import { validateToken } from './auth/isAuthenticated';
 import cors from 'cors';
 
 //Aguante heroku
@@ -83,12 +82,8 @@ export async function startServer(){
 
     apolloServer.applyMiddleware({app, cors: false});
 
-    app.listen(process.env.PORT || PORT,
-        () => console.log(`Server started on http://localhost:${PORT}${apolloServer.graphqlPath}`),
-    );
-    const PORT2 = 4001;
-    httpServer.listen(process.env.PORTWSS || PORT2, () =>
-      console.log(`wss is now running on http://localhost:${PORT2}/graphql`)
+    httpServer.listen(process.env.PORTWSS || PORT, () =>
+      console.log(`the server is now running on http://localhost:${PORT}/graphql`)
     );
 }
 

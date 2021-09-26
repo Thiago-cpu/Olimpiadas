@@ -1,17 +1,40 @@
 import { useMemo } from 'react'
-import { ApolloClient, ApolloLink, HttpLink, InMemoryCache } from '@apollo/client'
-import { concatPagination } from '@apollo/client/utilities'
+import { ApolloClient, ApolloLink, split, HttpLink, InMemoryCache } from '@apollo/client'
+import { concatPagination, getMainDefinition } from '@apollo/client/utilities'
 import merge from 'deepmerge'
 import isEqual from 'lodash/isEqual'
+import { WebSocketLink } from '@apollo/client/link/ws';
 
 export const APOLLO_STATE_PROP_NAME = '__APOLLO_STATE__'
-const httpLink = new HttpLink({ uri: 'http://localhost:4000/graphql', credentials: 'same-origin'});
+
+const wsLink = process.browser ? new WebSocketLink({
+  uri: 'ws://localhost:4000/graphql',
+  options: {
+    reconnect: true,
+  }
+}) : null;
+
+const httpLink = new HttpLink({
+  uri: 'http://localhost:4000/graphql',
+  credentials: 'same-origin'
+});
+
+const splitLink = process.browser ? split(
+  ({ query }) => {
+    const definition = getMainDefinition(query);
+    return (
+      definition.kind === 'OperationDefinition' &&
+      definition.operation === 'subscription'
+    );
+  },
+  wsLink,
+  httpLink,
+): httpLink;
 
 const authLink = new ApolloLink((operation, forward) => {
-
   operation.setContext({
     headers: {
-      authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Ijc3ZjNkNjJhLTdhYzctNGE1Yy1hM2Y5LTk2MmJkZjgzOGM3ZCIsImlhdCI6MTYzMjYwMDY2OCwiZXhwIjoxNjMyNjE1MDY4fQ.P_lFWWvrX-KTgL-i0c0iBOR8cjYantQ5gb9zpJLz2bU`
+      authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Ijc3ZjNkNjJhLTdhYzctNGE1Yy1hM2Y5LTk2MmJkZjgzOGM3ZCIsImlhdCI6MTYzMjY4MjcwMSwiZXhwIjoxNjMyNjk3MTAxfQ.JpwlA7o2rZuW_h4dbzzKTNZu7Hh3r4jSOtjVxoG0-eY`
     }
   });
   return forward(operation);
@@ -21,7 +44,7 @@ let apolloClient
 function createApolloClient() {
   return new ApolloClient({
     ssrMode: typeof window === 'undefined',
-    link: authLink.concat(httpLink),
+    link: authLink.concat(splitLink),
     cache: new InMemoryCache({
       typePolicies: {
         Query: {
