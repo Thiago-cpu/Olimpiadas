@@ -7,6 +7,5 @@
     "database": "olimpiadas",
     "entities": ["src/entity/**/*.ts"],
     "synchronize": true,
-    "logging": "all",
-    "logger": "file"
+    "logging": "all"
 }
