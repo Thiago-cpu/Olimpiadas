@@ -1,22 +1,6 @@
 import * as React from 'react';
 import Table from '@mui/material/Table';
-import {
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Grid,
-  Avatar,
-  Box,
-  InputLabel,
-  FormControl,
-  MenuItem,
-  Container,
-  Select
-} from '@mui/material'
-
+import {TableBody,TableCell,TableContainer,TableHead,TableRow,Paper,CircularProgress,Avatar,Box,InputLabel,FormControl,MenuItem,Container,Select} from '@mui/material'
 import { deepOrange, deepPurple } from '@mui/material/colors';
 import USure from '../components/DeleteUser.modal';
 import { gql, useQuery, useMutation } from '@apollo/client';
@@ -27,9 +11,7 @@ import Search from '../components/Search';
 
 
 const headerCell = {
-  fontWeight: 'bold',
-  backgroundColor: '#1976d2',
-  color: '#fff'
+
 }
 
 const CHANGE_ROLE = gql`
@@ -41,10 +23,21 @@ const CHANGE_ROLE = gql`
     }
   }
 `
+const GET_USERS = gql`
+  query allUser {
+    allUser {
+      data {
+      id
+      name
+      role
+      }
+    }
+  }
+`;
 
-export default function Users({data}) {
-  const arrRows = data.allUser.data
-  const users = arrRows.map(user => {return {label: user.name}})
+export default function UsersTable() {
+  const {data, loading, error} = useQuery(GET_USERS)
+  const arrRows = data?.allUser?.data
   const [rows, setRows] = React.useState(arrRows)
   const [changeRole, { loading: changeRoleLoading }] = useMutation(CHANGE_ROLE)
 
@@ -54,7 +47,11 @@ export default function Users({data}) {
       role: e.target.value
     }}})
   }
-
+  
+  React.useEffect(()=>{
+    setRows(data?.allUser?.data)
+  }, [data,setRows])
+  if(loading) return <CircularProgress />
   const handleSearchChange = (data) => {
     const newRows = arrRows.filter((row) => row.name.toLowerCase().startsWith(data.toLowerCase()))
     setRows(newRows)
@@ -66,26 +63,28 @@ export default function Users({data}) {
       return newRows
     })
   }
+
   return (
     <Container sx={{
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center"
+      // display: "flex",
+      // flexDirection: "column",
+      // alignItems: "center"
     }}>
+
     <Search styles={{}} onChange={handleSearchChange} label="Buscar usuario"/>
-    <TableContainer sx={{maxWidth: 600, borderRadius: 8, marginTop: 1}}component={Paper}>
-      <Table size="small" aria-label="a dense table">
+    <TableContainer sx={{maxWidth: 600, marginTop: 1}} component={Paper}>
+      <Table size="small">
         <TableHead>
           <TableRow>
-            <TableCell sx={headerCell} align="left"></TableCell>
-            <TableCell sx={headerCell} align="left">N°</TableCell>
-            <TableCell sx={headerCell} align="left">Nombre</TableCell>
-            <TableCell sx={headerCell} align="left">Rol</TableCell>
-            <TableCell sx={headerCell} align="left"></TableCell>
+            <TableCell align="left"></TableCell>
+            <TableCell align="left">N°</TableCell>
+            <TableCell align="left">Nombre</TableCell>
+            <TableCell align="left">Rol</TableCell>
+            {/* <TableCell align="left"></TableCell> */}
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows.length?
+          {rows?.length?
           rows.map((row, i) => (
             <TableRow
               key={row.id}
@@ -125,9 +124,11 @@ export default function Users({data}) {
             </TableRow>
           ))
           :
-          <TableCell variant="footer" colSpan={5}>
-            <p style={{textAlign: "center"}}>Usuario no encontrado.</p>
-          </TableCell >
+          <TableRow>
+            <TableCell colSpan={5}>
+              <p style={{textAlign: "center"}}>Usuario no encontrado.</p>
+            </TableCell >
+          </TableRow>
         }
         </TableBody>
       </Table>
@@ -135,25 +136,4 @@ export default function Users({data}) {
     </Container>
   );
 }
-const GET_USERS = gql`
-  query allUser {
-    allUser {
-      data {
-      id
-      name
-      role
-      }
-    }
-  }
-`;
-export async function getServerSideProps() {
-  const client = initializeApollo()
-  const { data } = await client.query({
-    query:GET_USERS,
-  });
-
-  return addApolloState(client, {
-    props: {data},
-  })
-};
 
