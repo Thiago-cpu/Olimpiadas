@@ -17,9 +17,25 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { gql, useMutation} from '@apollo/client'
+import Router from 'next/router'
+
+const REGISTER = gql`
+  mutation Register($registerData: userInput!) {
+    register(data: $registerData) {
+      errors {
+        field
+        message
+      }
+      data {
+        name
+      }
+    }
+  }
+`
 
 export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
+  const [register] = useMutation(REGISTER)
 
   const {
     handleSubmit,
@@ -41,11 +57,25 @@ export default function Register() {
         .max(15, "Máximo 15 caracteres"),
       password: Yup.string()
         .required("Requerido")
-        .min(6, "Mínimo 6 caracteres"),
+        .max(12, "máximo 12 caracteres"),
     }),
     onSubmit: async (values) => {
         try{
-            await setTimeout(()=>{console.log(values)},2000)
+          const { data, errors } = await register({
+            variables: {
+                registerData: {
+                    ...values
+                },
+            },
+        })
+        const {register: registerData} = data
+        if(!registerData.errors && !errors){
+          //usuario registrado correctamente enviar a login
+          Router.push("/login")
+        } else {
+          if(registerData.errors) alert(registerData.errors[0].message)
+          
+        }
         }
         catch(e){
             console.log(e)
@@ -140,13 +170,15 @@ export default function Register() {
           <Link href="#" underline="hover" variant="caption" mt="0.2em">
             ¿Ya tienes una cuenta?
           </Link>
-          <LoadingButton 
-            variant="outlined" 
-            sx={{ width: "155px", height: "42px" }}
-            disabled={isSubmitting}
-          >
-            Iniciar Sesión
-          </LoadingButton>
+          <Link href="./login">
+            <LoadingButton 
+              variant="outlined" 
+              sx={{ width: "155px", height: "42px" }}
+              disabled={isSubmitting}
+            >
+              Iniciar Sesión
+            </LoadingButton>
+          </Link>
         </div>
       </Container>
     </Box>

@@ -17,6 +17,7 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { gql, useMutation} from '@apollo/client'
+import Router from 'next/router'
 
 const LOGIN_MUTATION = gql`
     mutation Login($loginData: userInput!) {
@@ -62,7 +63,7 @@ const [login] = useMutation(LOGIN_MUTATION)
         .max(15, "Máximo 15 caracteres"),
       password: Yup.string()
         .required("Requerido")
-        .min(6, "Mínimo 6 caracteres"),
+        .max(12, "Máximo 12 caracteres"),
     }),
     onSubmit: async (values) => {
         try{
@@ -73,6 +74,15 @@ const [login] = useMutation(LOGIN_MUTATION)
                     },
                 },
             })
+            const {login: loginData} = data
+            console.log(loginData)
+            if(loginData.authToken){
+              window.localStorage.setItem("auth", loginData.authToken)
+              Router.push("/sucursal/misSucursales")
+            }
+            if(loginData.errors){
+              alert(loginData.errors[0].message)
+            }
         }
         catch(e){
             console.log(e)
@@ -168,9 +178,11 @@ const [login] = useMutation(LOGIN_MUTATION)
             ¿Olvidaste la contraseña?
           </Link>
         </div>
-        <LoadingButton disabled={isSubmitting} variant="outlined" sx={{ width: "155px", height: "42px" }}>
-          Registrate
-        </LoadingButton>
+        <Link href="./register">
+          <LoadingButton disabled={isSubmitting} variant="outlined" sx={{ width: "155px", height: "42px" }}>
+            Registrate
+          </LoadingButton>
+        </Link>
       </Container>
     </Box>
   );
