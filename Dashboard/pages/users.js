@@ -1,6 +1,27 @@
 import * as React from 'react';
 import Table from '@mui/material/Table';
+<<<<<<< Updated upstream
 import {TableBody,TableCell,TableContainer,TableHead,TableRow,Paper,CircularProgress,Avatar,Box,InputLabel,FormControl,MenuItem,Container,Select} from '@mui/material'
+=======
+import {
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Grid,
+  Avatar,
+  Box,
+  InputLabel,
+  FormControl,
+  MenuItem,
+  Container,
+  Select
+} from '@mui/material'
+import nookies from 'nookies'
+
+>>>>>>> Stashed changes
 import { deepOrange, deepPurple } from '@mui/material/colors';
 import USure from '../components/DeleteUser.modal';
 import { gql, useQuery, useMutation } from '@apollo/client';
