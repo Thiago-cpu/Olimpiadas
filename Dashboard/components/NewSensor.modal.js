@@ -41,6 +41,9 @@ export default function NewSensor({sucursalName= "Sucursal", id=""}) {
 
   const handleSubmit = (e) => {
     e.preventDefault()
+    if(macAddress.length < 10 || macAddress.length > 100 ||(selectValue !== "Ingreso" && selectValue !== "Egreso")){
+      return false
+    }
     addSensor({
       variables:{ 
         addSensorData:{
@@ -67,16 +70,6 @@ export default function NewSensor({sucursalName= "Sucursal", id=""}) {
 
   const handleScan = (data) => {
     setMacAddress(data)
-  }
-
-  const onSubmit = (sucursalData) => {
-    // addSucursal({variables: {
-    //   addSucursalData: {
-    //     ...sucursalData,
-    //     encargadoId: id
-    //   }
-    // }})
-    handleClose()
   }
 
   return (
