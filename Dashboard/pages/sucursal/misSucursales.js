@@ -23,7 +23,7 @@ import {
 } from '@mui/material'
 import EditIcon from '@mui/icons-material/Edit';
 import DoneAllIcon from '@mui/icons-material/DoneAll';
-import TransferWithinAStationIcon from '@mui/icons-material/TransferWithinAStation';
+import StorefrontIcon from '@mui/icons-material/Storefront';
 import { gql, useQuery, useMutation } from '@apollo/client';
 import Search from '../../components/Search';
 import NewSensor from '../../components/NewSensor.modal';
@@ -178,9 +178,11 @@ function CreateRow({row, i, rowsEdits, makeRowEditable, updateSucursal, handlePa
     </TableCell>
     <TableCell align="center">
       <Link href={`./${row.id}`}>
+        <Tooltip title="Estado actual" placement="right">
         <Fab color="primary">
-          <TransferWithinAStationIcon/>
+          <StorefrontIcon/>
         </Fab>
+        </Tooltip>
       </Link>
     </TableCell>
   </TableRow>
@@ -241,15 +243,17 @@ export default function UsersTable() {
   return (
     <Container>
     <Search onChange={handleSearchChange} label="Buscar sucursal"/>
-    <TableContainer sx={{maxWidth: 600, marginTop: 1}} component={Paper}>
+    <TableContainer sx={{maxWidth: 700, marginTop: 1}} component={Paper}>
       <Table size="small">
         <TableHead>
           <TableRow>
-            <TableCell align="center"></TableCell>
+            <TableCell align="center">Editar</TableCell>
             <TableCell align="center">N°</TableCell>
             <TableCell align="center">Nombre</TableCell>
             <TableCell align="center">capacidad<br/> Máxima</TableCell>
             <TableCell align="center">Localización</TableCell>
+            <TableCell align="center">Añadir<br/>sensor</TableCell>
+            <TableCell align="center">Estado</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>

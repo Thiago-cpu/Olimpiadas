@@ -1,14 +1,12 @@
 import * as React from 'react';
 import Table from '@mui/material/Table';
-<<<<<<< Updated upstream
-import {TableBody,TableCell,TableContainer,TableHead,TableRow,Paper,CircularProgress,Avatar,Box,InputLabel,FormControl,MenuItem,Container,Select} from '@mui/material'
-=======
 import {
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
+  CircularProgress,
   Paper,
   Grid,
   Avatar,
@@ -21,7 +19,6 @@ import {
 } from '@mui/material'
 import nookies from 'nookies'
 
->>>>>>> Stashed changes
 import { deepOrange, deepPurple } from '@mui/material/colors';
 import USure from '../components/DeleteUser.modal';
 import { gql, useQuery, useMutation } from '@apollo/client';
@@ -97,11 +94,11 @@ export default function UsersTable() {
       <Table size="small">
         <TableHead>
           <TableRow>
-            <TableCell align="left"></TableCell>
-            <TableCell align="left">N°</TableCell>
-            <TableCell align="left">Nombre</TableCell>
-            <TableCell align="left">Rol</TableCell>
-            {/* <TableCell align="left"></TableCell> */}
+            <TableCell align="center">Borrar</TableCell>
+            <TableCell align="center">N°</TableCell>
+            <TableCell align="center">Nombre</TableCell>
+            <TableCell align="center">Rol</TableCell>
+            <TableCell align="center">Añadir<br/>Sucursal</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -111,17 +108,17 @@ export default function UsersTable() {
               key={row.id}
               sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
             >
-              <TableCell sx={{width: 50}} align="left" component="th" scope="row">
+              <TableCell sx={{width: 50}} align="center" component="th" scope="row">
                 <USure onClick={() => {removeRow(row.id)}} name={row.name} id={row.id}/>
               </TableCell>
-              <TableCell sx={{width: 50}} align="left">
+              <TableCell sx={{width: 50}} align="center">
                 {i+1}
               </TableCell>
-              <TableCell align="left" sx={{width: 150}}>
-                  <Avatar alt={row.name} sx={row.name[0] > 'k'? { bgcolor: deepOrange[500] }: { bgcolor: deepPurple[500] }} src='.'/>
+              <TableCell align="center" sx={{width: 100, textAlign: "-webkit-center"}}>
+                  <Avatar alt={row.name} sx={row.name[0] > 'k'? { bgcolor: deepOrange[500]}: { bgcolor: deepPurple[500] }} src='.'/>
                   {row.name}
               </TableCell>
-              <TableCell sx={{ width: 125 }} align="left">
+              <TableCell sx={{ width: 125 }} align="center">
                 <Box>
                   <FormControl fullWidth>
                     <InputLabel id="demo-simple-select-label">Rol</InputLabel>
@@ -139,7 +136,7 @@ export default function UsersTable() {
                   </FormControl>
                 </Box>
               </TableCell>
-              <TableCell align="left">
+              <TableCell align="center">
                 <NewSucursal name={row.name} id={row.id}/>
               </TableCell>
             </TableRow>
