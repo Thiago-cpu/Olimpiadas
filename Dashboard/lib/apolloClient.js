@@ -4,6 +4,7 @@ import { concatPagination, getMainDefinition } from '@apollo/client/utilities'
 import merge from 'deepmerge'
 import isEqual from 'lodash/isEqual'
 import { WebSocketLink } from '@apollo/client/link/ws';
+import {parseCookies} from 'nookies'
 
 export const APOLLO_STATE_PROP_NAME = '__APOLLO_STATE__'
 
@@ -32,9 +33,11 @@ const splitLink = process.browser ? split(
 ): httpLink;
 
 const authLink = new ApolloLink((operation, forward) => {
+  const { token } = parseCookies()
+  console.log({token})
   operation.setContext({
     headers: {
-      authorization: window.localStorage.getItem('auth')?`bearer ${window.localStorage.getItem('auth')}` : ""
+      authorization: token ? `Bearer ${token}` : null,
     }
   });
   return forward(operation);

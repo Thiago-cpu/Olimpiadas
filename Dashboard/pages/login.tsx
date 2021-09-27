@@ -17,7 +17,12 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { gql, useMutation} from '@apollo/client'
+<<<<<<< Updated upstream
 import Router from 'next/router'
+=======
+import useLocalStorage from "../lib/useLocalStorage";
+import { setCookie } from 'nookies'
+>>>>>>> Stashed changes
 
 const LOGIN_MUTATION = gql`
     mutation Login($loginData: userInput!) {
@@ -42,7 +47,8 @@ const LOGIN_MUTATION = gql`
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
-const [login] = useMutation(LOGIN_MUTATION)
+  const [login] = useMutation(LOGIN_MUTATION)
+  const [_, setToken] = useLocalStorage('token', '')
   const {
     handleSubmit,
     handleBlur,
@@ -74,15 +80,13 @@ const [login] = useMutation(LOGIN_MUTATION)
                     },
                 },
             })
-            const {login: loginData} = data
-            console.log(loginData)
-            if(loginData.authToken){
-              window.localStorage.setItem("auth", loginData.authToken)
-              Router.push("/sucursal/misSucursales")
-            }
-            if(loginData.errors){
-              alert(loginData.errors[0].message)
-            }
+            !data.login?.errors?.length &&
+            setCookie(null, 'token', data.login.authToken, {
+                maxAge: 30 * 24 * 60 * 60,
+                path: '/',
+            })
+            Router.push("/sucursal/misSucursales")
+
         }
         catch(e){
             console.log(e)
