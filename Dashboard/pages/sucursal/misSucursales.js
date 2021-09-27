@@ -19,15 +19,17 @@ import {
   TableRow,
   TextField,
   Tooltip,
+  Link,
 } from '@mui/material'
-
 import EditIcon from '@mui/icons-material/Edit';
 import DoneAllIcon from '@mui/icons-material/DoneAll';
+import TransferWithinAStationIcon from '@mui/icons-material/TransferWithinAStation';
 import { gql, useQuery, useMutation } from '@apollo/client';
 import Search from '../../components/Search';
 import NewSensor from '../../components/NewSensor.modal';
 import { useFormik } from "formik";
 import * as Yup from "yup";
+
 
 const GET_MY_SUCURSALES = gql`
 query MySucursals {
@@ -86,7 +88,7 @@ function CreateRow({row, i, rowsEdits, makeRowEditable, updateSucursal, handlePa
           const {updateMySucursal} = data
           const {errors, data:sucursal} = updateMySucursal
           if(errors){
-            return alert(errors.message)
+            return alert(errors[0].message)
           }
           handleParentSubmit(sucursal)
       }
@@ -128,9 +130,6 @@ function CreateRow({row, i, rowsEdits, makeRowEditable, updateSucursal, handlePa
     <TableCell sx={{ width: 125 }} align="center">
       {row.localizacion}
     </TableCell>
-    <TableCell align="center">
-      <NewSensor name={row.name} id={row.id}/>
-    </TableCell>
     </>
     :
     <>
@@ -171,11 +170,19 @@ function CreateRow({row, i, rowsEdits, makeRowEditable, updateSucursal, handlePa
       helperText={touched.localizacion && errors.localizacion}
       />
     </TableCell>
+
+    </>
+    }
     <TableCell align="center">
       <NewSensor name={row.name} id={row.id}/>
     </TableCell>
-    </>
-    }
+    <TableCell align="center">
+      <Link href={`./${row.id}`}>
+        <Fab color="primary">
+          <TransferWithinAStationIcon/>
+        </Fab>
+      </Link>
+    </TableCell>
   </TableRow>
   )
 }

@@ -15,6 +15,9 @@ const SUBSCRIPTION = gql`
 
 
 export default function Ingreso({id, initialData}) {
+  if(initialData.errors){
+    return <p>{initialData.errors[0].message}</p>
+  }
   const { data, loading } = useSubscription(
     SUBSCRIPTION,
     {
@@ -23,8 +26,8 @@ export default function Ingreso({id, initialData}) {
   );
   let cantidadDePersonas, maximaCantidadDePersonas;
   if(loading) {
-    cantidadDePersonas = initialData.lastMove.data.cantidadActual
-    maximaCantidadDePersonas = initialData.lastMove.data.sucursal.capacidadMaxima
+    cantidadDePersonas = initialData.data.cantidadActual
+    maximaCantidadDePersonas = initialData.data.sucursal.capacidadMaxima
   } else {
     cantidadDePersonas = data.actualPeople.cant
     maximaCantidadDePersonas = data.actualPeople.maxCant
@@ -76,6 +79,9 @@ const GET_INITIAL_DATA = gql`
         }
         cantidadActual
       }
+      errors {
+        message
+      }
     }
   }
 `
@@ -94,7 +100,7 @@ export async function getServerSideProps({params}){
   return addApolloState(client, {
     props: {
       id,
-      initialData
+      initialData: initialData.lastMove
     },
   })
 }

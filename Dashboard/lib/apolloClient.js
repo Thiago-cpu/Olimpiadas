@@ -34,7 +34,7 @@ const splitLink = process.browser ? split(
 const authLink = new ApolloLink((operation, forward) => {
   operation.setContext({
     headers: {
-      authorization: `bearer ${window.localStorage.getItem('auth')}` || ""
+      authorization: window.localStorage.getItem('auth')?`bearer ${window.localStorage.getItem('auth')}` : ""
     }
   });
   return forward(operation);

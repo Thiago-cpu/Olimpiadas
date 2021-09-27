@@ -5,6 +5,7 @@ import { Sensor } from '../entity/Sensor';
 import { newError } from '../utils/newError';
 import { MovimientoEnum } from '../enums/movimiento.enum';
 import { PubSubEngine } from "graphql-subscriptions";
+import { Sucursal } from '../entity/Sucursal';
 
 @ObjectType()
 class movimientoResponse extends baseResponse{
@@ -46,10 +47,16 @@ export class movimientoResolver{
 
     @Query(() => movimientoResponse)
     async lastMove(@Arg('sucursalId') sucursalId: string): Promise<movimientoResponse>{
-        const lastmove = await Movimiento.findLastMove(sucursalId)
-        console.log({lastmove})
-        if(!lastmove){
+        const existSucursal = await Sucursal.findOne(sucursalId)
+        if(!existSucursal){
             return newError("sucursal", "La sucursal no existe")
+        }
+        const lastmove = await Movimiento.findLastMove(sucursalId)
+        if(!lastmove){
+            return {data: Movimiento.create({
+                cantidadActual: 0,
+                sucursal: existSucursal,
+            })}
         }
         return {data: lastmove}
     } 
