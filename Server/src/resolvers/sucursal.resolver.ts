@@ -1,6 +1,6 @@
 import { Arg, Mutation, Resolver, ObjectType, Field, Authorized, Query, Ctx, Args, createMethodDecorator } from 'type-graphql';
 import { Sucursal } from '../entity/Sucursal';
-import { sucursalInput, adminPartialSucursalInput, partialSucursalInput as updateSucursalInput } from './types/sucursal.input';
+import { sucursalInput, adminPartialSucursalInput, updateSucursalInput } from './types/sucursal.input';
 import { User } from '../entity/User';
 import { Role } from '../enums/role.enum';
 import { createBaseResolver } from '../baseTypes/baseResolver.resolver';
@@ -80,7 +80,7 @@ export class SucursalResolver extends SucursalBaseResolver{
             const argsNotNull: updateSucursalInput = extractNullProps(args)
             if(argsNotNull.name){
                 const alreadyHas = await Sucursal.findOne({where: {name: argsNotNull.name, encargado: payload!.id}})
-                if(alreadyHas){
+                if(alreadyHas && alreadyHas.id !== sucursalId){
                     return newError("updateMySucursal", "Ya tienes una sucursal con ese nombre")
                 }
             } 

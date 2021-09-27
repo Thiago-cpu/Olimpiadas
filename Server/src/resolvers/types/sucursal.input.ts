@@ -1,4 +1,4 @@
-import { IsOptional, Length, maxLength } from "class-validator";
+import { IsOptional, IsPositive, isPositive, Length, maxLength } from "class-validator";
 import { Field, InputType, Int } from "type-graphql";
 import { Sucursal } from '../../entity/Sucursal';
 
@@ -8,10 +8,11 @@ export class sucursalInput implements Partial<Sucursal>{
     @Field()
     name: string
     
+    @IsPositive()
     @Field(() => Int)
     capacidadMaxima: number
 
-    @Length(3,255)
+    @Length(10,255)
     @Field()
     localizacion: string
 
@@ -19,11 +20,12 @@ export class sucursalInput implements Partial<Sucursal>{
     encargadoId: string
 }
 @InputType()
-export class partialSucursalInput implements Partial<sucursalInput>{
+export class updateSucursalInput implements Partial<sucursalInput>{
     @Length(3,30)
     @Field({nullable: true})
     name?: string
 
+    @IsPositive()
     @Field(() => Int, {nullable: true})
     capacidadMaxima?: number
 
@@ -32,7 +34,7 @@ export class partialSucursalInput implements Partial<sucursalInput>{
     localizacion?: string
 }
 @InputType()
-export class adminPartialSucursalInput extends partialSucursalInput{
+export class adminPartialSucursalInput extends updateSucursalInput{
     @Field({nullable: true})
     encargado?: string
 }

@@ -34,7 +34,7 @@ const splitLink = process.browser ? split(
 const authLink = new ApolloLink((operation, forward) => {
   operation.setContext({
     headers: {
-      authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Ijc3ZjNkNjJhLTdhYzctNGE1Yy1hM2Y5LTk2MmJkZjgzOGM3ZCIsImlhdCI6MTYzMjY4MjcwMSwiZXhwIjoxNjMyNjk3MTAxfQ.JpwlA7o2rZuW_h4dbzzKTNZu7Hh3r4jSOtjVxoG0-eY`
+      authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Ijc3ZjNkNjJhLTdhYzctNGE1Yy1hM2Y5LTk2MmJkZjgzOGM3ZCIsImlhdCI6MTYzMjY5NzMzMywiZXhwIjoxNjMyNzExNzMzfQ.vnxuGEBL5dTskPT5Ieri6VjlsLymn6JMxeVmepg84rI`
     }
   });
   return forward(operation);
