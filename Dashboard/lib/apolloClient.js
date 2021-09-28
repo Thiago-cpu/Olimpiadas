@@ -5,18 +5,19 @@ import merge from 'deepmerge'
 import isEqual from 'lodash/isEqual'
 import { WebSocketLink } from '@apollo/client/link/ws';
 import {parseCookies} from 'nookies'
+import {setContext} from '@apollo/client/link/context'
 
 export const APOLLO_STATE_PROP_NAME = '__APOLLO_STATE__'
 
 const wsLink = process.browser ? new WebSocketLink({
-  uri: 'ws://localhost:4000/graphql',
+  uri: `ws://${process.env.DOMAIN || 'localhost'}:4000/graphql`,
   options: {
     reconnect: true,
   }
 }) : null;
 
 const httpLink = new HttpLink({
-  uri: 'http://localhost:4000/graphql',
+  uri: `http://${process.env.DOMAIN || 'localhost'}:4000/graphql`,
   credentials: 'same-origin'
 });
 
@@ -32,15 +33,15 @@ const splitLink = process.browser ? split(
   httpLink,
 ): httpLink;
 
-const authLink = new ApolloLink((operation, forward) => {
+const authLink = setContext((request) => {
   const { token } = parseCookies()
-  console.log({token})
-  operation.setContext({
+  console.log({token}, "token")
+
+  return {
     headers: {
       authorization: token ? `Bearer ${token}` : null,
     }
-  });
-  return forward(operation);
+}
 });
 let apolloClient
 

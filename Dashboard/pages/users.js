@@ -70,6 +70,7 @@ export default function UsersTable() {
     setRows(data?.allUser?.data)
   }, [data,setRows])
   if(loading) return <CircularProgress />
+  if (error) return <p>{error.message}</p>
   const handleSearchChange = (data) => {
     const newRows = arrRows.filter((row) => row.name.toLowerCase().startsWith(data.toLowerCase()))
     setRows(newRows)
@@ -83,12 +84,7 @@ export default function UsersTable() {
   }
 
   return (
-    <Container sx={{
-      // display: "flex",
-      // flexDirection: "column",
-      // alignItems: "center"
-    }}>
-
+    <Container>
     <Search styles={{}} onChange={handleSearchChange} label="Buscar usuario"/>
     <TableContainer sx={{maxWidth: 600, marginTop: 1}} component={Paper}>
       <Table size="small">

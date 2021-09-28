@@ -12,12 +12,17 @@ import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import LoginIcon from '@mui/icons-material/Login';
+import LogoutIcon from '@mui/icons-material/Logout';
 import ListItem from '@mui/material/ListItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import InboxIcon from '@mui/icons-material/MoveToInbox';
-import MailIcon from '@mui/icons-material/Mail';
-
+import UserContext from "../context/userContext";
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import CheckroomIcon from '@mui/icons-material/Checkroom';
+import StorefrontIcon from '@mui/icons-material/Storefront';
+import PeopleIcon from '@mui/icons-material/People';
+import Link from 'next/link'
 const drawerWidth = 240;
 
 const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(
@@ -51,6 +56,7 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 
 export default function Layout({children}) {
   const theme = useTheme();
+  const {user, logout} = React.useContext(UserContext)
   const [open, setOpen] = React.useState(false);
 
   const handleDrawerOpen = () => {
@@ -80,7 +86,7 @@ export default function Layout({children}) {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" noWrap component="div">
-            Persistent drawer
+            Olimpis
           </Typography>
         </Toolbar>
       </AppBar>
@@ -93,9 +99,9 @@ export default function Layout({children}) {
             boxSizing: 'border-box',
           },
         }}
-        variant="persistent"
         anchor="left"
         open={open}
+        onBlur={handleDrawerClose}
       >
         <DrawerHeader>
           <p>Menu</p>
@@ -105,25 +111,75 @@ export default function Layout({children}) {
         </DrawerHeader>
         <Divider />
         <List>
-          {['Inbox', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
-            <ListItem button key={text}>
-              <ListItemIcon>
-                {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-              </ListItemIcon>
-              <ListItemText primary={text} />
+          <ListItem>
+            <ListItemIcon>
+              <AccountCircleIcon/>
+            </ListItemIcon>
+            <ListItemText primary={user.isLogged?user.name:"Invitado"} />
+          </ListItem>
+          <Link href="/sucursales">
+            <ListItem button onClick={handleDrawerClose}>
+                <ListItemIcon>
+                  <StorefrontIcon />
+                </ListItemIcon>
+                <ListItemText primary={"Sucursales"} />
             </ListItem>
-          ))}
+          </Link>
+          {user.isLogged &&
+          <>
+          <Link href="/misSucursales">
+            <ListItem button onClick={handleDrawerClose}>
+                <ListItemIcon>
+                  <StorefrontIcon />
+                </ListItemIcon>
+                <ListItemText primary={"Mis Sucursales"} />
+            </ListItem>
+          </Link>
+          {user.role === "Admin" &&
+          <Link href="/users">
+          <ListItem button onClick={handleDrawerClose}>
+            <ListItemIcon>
+              <PeopleIcon />
+            </ListItemIcon>
+            <ListItemText primary={"Usuarios"} />
+          </ListItem>
+          </Link>
+          
+          }
+          </>
+          }
         </List>
         <Divider />
         <List>
-          {['All mail', 'Trash', 'Spam'].map((text, index) => (
-            <ListItem button key={text}>
+          {user.isLogged?
+          <ListItem button onClick={()=>{logout(); handleDrawerClose()}}>
+            <ListItemIcon>
+              <LogoutIcon />
+            </ListItemIcon>
+            <ListItemText primary={"Logout"} />
+          </ListItem>
+          :
+          <>
+          <Link sx={{}} href="/login">
+            <ListItem button onClick={handleDrawerClose}>
               <ListItemIcon>
-                {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
+                <LoginIcon />
               </ListItemIcon>
-              <ListItemText primary={text} />
+              <ListItemText primary={"Login"} />
             </ListItem>
-          ))}
+          </Link>
+          <Link sx={{}} href="/register">
+            <ListItem button onClick={handleDrawerClose}>
+              <ListItemIcon>
+                <CheckroomIcon />
+              </ListItemIcon>
+              <ListItemText primary={"Register"} />
+            </ListItem>
+          </Link>
+          </>
+
+          }
+
         </List>
       </Drawer>
       <Main sx={{
