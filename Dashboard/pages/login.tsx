@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import {
   Typography,
   Box,
@@ -19,6 +19,7 @@ import * as Yup from "yup";
 import { gql, useMutation} from '@apollo/client'
 import Router from 'next/router'
 import { setCookie } from 'nookies'
+import UserContext from "../context/userContext";
 
 const LOGIN_MUTATION = gql`
     mutation Login($loginData: userInput!) {
@@ -42,6 +43,7 @@ const LOGIN_MUTATION = gql`
 `
 
 export default function Login() {
+  const {setUser} = useContext(UserContext)
   const [showPassword, setShowPassword] = useState(false);
   const [login] = useMutation(LOGIN_MUTATION)
   const {
@@ -75,13 +77,20 @@ export default function Login() {
                     },
                 },
             })
-            !data.login?.errors?.length &&
-            setCookie(null, 'token', data.login.authToken, {
-                maxAge: 30 * 24 * 60 * 60,
-                path: '/',
-            })
-            Router.push("/sucursal/misSucursales")
-
+            if(!data.login?.errors?.length){
+              setCookie(null, 'token', data.login.authToken, {
+                  maxAge: 30 * 24 * 60 * 60,
+                  path: '/',
+              })
+              const {id, role, name} = data.login.data
+              setUser({
+                isLogged: true,
+                role,
+                name
+              })
+              Router.push("/misSucursales")
+              
+            }
         }
         catch(e){
             console.log(e)

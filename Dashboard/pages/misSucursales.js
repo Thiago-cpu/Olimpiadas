@@ -19,14 +19,14 @@ import {
   TableRow,
   TextField,
   Tooltip,
-  Link,
 } from '@mui/material'
+import Link from "next/link"
 import EditIcon from '@mui/icons-material/Edit';
 import DoneAllIcon from '@mui/icons-material/DoneAll';
 import StorefrontIcon from '@mui/icons-material/Storefront';
 import { gql, useQuery, useMutation } from '@apollo/client';
-import Search from '../../components/Search';
-import NewSensor from '../../components/NewSensor.modal';
+import Search from '../components/Search';
+import NewSensor from '../components/NewSensor.modal';
 import { useFormik } from "formik";
 import * as Yup from "yup";
 
@@ -177,7 +177,7 @@ function CreateRow({row, i, rowsEdits, makeRowEditable, updateSucursal, handlePa
       <NewSensor name={row.name} id={row.id}/>
     </TableCell>
     <TableCell align="center">
-      <Link href={`./${row.id}`}>
+      <Link href={`/sucursal/${row.id}`}>
         <Tooltip title="Estado actual" placement="right">
         <Fab color="primary">
           <StorefrontIcon/>
@@ -216,7 +216,7 @@ export default function UsersTable() {
     setRows(data?.me?.data.sucursales)
   }, [data,setRows])
   if(loading) return <CircularProgress />
-  if(error) return <p>{error}</p>
+  if(error) return <p>{error.message}</p>
 
   const handleSearchChange = (data) => {
     const newRows = arrRows.filter((row) => row.name.toLowerCase().startsWith(data.toLowerCase()))

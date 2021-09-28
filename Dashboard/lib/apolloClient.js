@@ -5,6 +5,7 @@ import merge from 'deepmerge'
 import isEqual from 'lodash/isEqual'
 import { WebSocketLink } from '@apollo/client/link/ws';
 import {parseCookies} from 'nookies'
+import {setContext} from '@apollo/client/link/context'
 
 export const APOLLO_STATE_PROP_NAME = '__APOLLO_STATE__'
 
@@ -32,14 +33,15 @@ const splitLink = process.browser ? split(
   httpLink,
 ): httpLink;
 
-const authLink = new ApolloLink((operation, forward) => {
+const authLink = setContext((request) => {
   const { token } = parseCookies()
-  operation.setContext({
+  console.log({token}, "token")
+
+  return {
     headers: {
       authorization: token ? `Bearer ${token}` : null,
     }
-  });
-  return forward(operation);
+}
 });
 let apolloClient
 
