@@ -1,10 +1,11 @@
 {
     "type": "mysql",
-    "host": "biiuq9yzxamyv59j0pre-mysql.services.clever-cloud.com",
+    "host": "localhost",
     "port": 3306,
-    "username": "urdyy0fblggbb9kz",
-    "password": "LeroaFRUAEeBw1WRWzXo",
-    "database": "biiuq9yzxamyv59j0pre",
+    "username": "root",
+    "password": "",
+    "database": "olimpiadas",
     "entities": ["src/entity/**/*.ts"],
+    "synchronize": true,
     "logging": "all"
 }
