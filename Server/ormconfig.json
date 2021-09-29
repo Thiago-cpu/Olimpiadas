@@ -1,10 +1,10 @@
 {
     "type": "mysql",
-    "host": "biiuq9yzxamyv59j0pre-mysql.services.clever-cloud.com",
+    "host": "fceuj506xied.us-east-1.psdb.cloud",
     "port": 3306,
-    "username": "urdyy0fblggbb9kz",
-    "password": "LeroaFRUAEeBw1WRWzXo",
-    "database": "biiuq9yzxamyv59j0pre",
+    "username": "zn6i3uztkmbs",
+    "password": "pscale_pw_7_Vt93YkAFN3xeg_r957axPH3HqMGoSQIjGKGq-Ytsw",
+    "database": "olimpiadas",
     "entities": ["src/entity/**/*.ts"],
     "synchronize": true,
     "logging": "all"
