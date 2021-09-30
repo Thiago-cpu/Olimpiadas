@@ -174,7 +174,7 @@ function CreateRow({row, i, rowsEdits, makeRowEditable, updateSucursal, handlePa
     </>
     }
     <TableCell align="center">
-      <NewSensor name={row.name} id={row.id}/>
+      <NewSensor sucursalName={row.name} id={row.id}/>
     </TableCell>
     <TableCell align="center">
       <Link href={`/sucursal/${row.id}`}>
