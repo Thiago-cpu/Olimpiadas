@@ -20,6 +20,8 @@ import { useMutation, gql } from "@apollo/client";
 import QrScanner from "./QrScanner.modal";
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import AlertContext from "../context/alertContext";
+
 
 const ADD_SENSOR = gql`
   mutation AddSensor(
@@ -39,6 +41,7 @@ const ADD_SENSOR = gql`
 `;
 
 export default function NewSensor({ sucursalName = "Sucursal", id = "" }) {
+  const {setAlert} = React.useContext(AlertContext)
   const [open, setOpen] = React.useState(false);
   const [addSensor] = useMutation(ADD_SENSOR);
 
@@ -77,12 +80,22 @@ export default function NewSensor({ sucursalName = "Sucursal", id = "" }) {
       const {addSensor: sensorData} = data
       if(errors || sensorData.errors){
         if(sensorData.errors[0].field === "macAddress"){
-          alert("El sensor ya está registrado")
+          setAlert({
+            severity: "error",
+            text: "El sensor ya está registrado",
+          })
         } else {
-          alert("Algo fue mal")
+          setAlert({
+            severity: "error",
+            text: "No se ha podido añadir el sensor",
+          })
         }
       } else {
-        alert("Listo")
+        setAlert({
+          severity: "success",
+          text: "Sensor añadido correctamente",
+        })
+        handleClose()
       }
     },
   });

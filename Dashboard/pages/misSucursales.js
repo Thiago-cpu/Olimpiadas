@@ -29,6 +29,7 @@ import Search from '../components/Search';
 import NewSensor from '../components/NewSensor.modal';
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import AlertContext from '../context/alertContext';
 
 
 const GET_MY_SUCURSALES = gql`
@@ -47,6 +48,7 @@ query MySucursals {
 `;
 
 function CreateRow({row, i, rowsEdits, makeRowEditable, updateSucursal, handleParentSubmit}){
+  const {setAlert} = React.useContext(AlertContext)
   const {
     handleSubmit,
     handleBlur,
@@ -88,9 +90,17 @@ function CreateRow({row, i, rowsEdits, makeRowEditable, updateSucursal, handlePa
           const {updateMySucursal} = data
           const {errors, data:sucursal} = updateMySucursal
           if(errors){
-            return alert(errors[0].message)
+            setAlert({
+              severity: "error",
+              text: errors[0].message
+            })
+          } else {
+            setAlert({
+              severity: "success",
+              text: `La sucursal ${sucursal.name} fue actualizada correctamente`
+            })
+            handleParentSubmit(sucursal)
           }
-          handleParentSubmit(sucursal)
       }
       catch(e){
           console.log(e)

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState, useContext } from "react";
 import {
   Typography,
   Box,
@@ -18,6 +18,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { gql, useMutation} from '@apollo/client'
 import Router from 'next/router'
+import AlertContext from '../context/alertContext'
 
 const REGISTER = gql`
   mutation Register($registerData: userInput!) {
@@ -34,6 +35,7 @@ const REGISTER = gql`
 `
 
 export default function Register() {
+  const {setAlert} = useContext(AlertContext)
   const [showPassword, setShowPassword] = useState(false);
   const [register] = useMutation(REGISTER)
 
@@ -73,8 +75,12 @@ export default function Register() {
           //usuario registrado correctamente enviar a login
           Router.push("/login")
         } else {
-          if(registerData.errors) alert(registerData.errors[0].message)
-          
+          if(registerData.errors) {
+            setAlert({
+              severity: "info",
+              text: registerData.errors[0].message
+            })
+          }
         }
         }
         catch(e){

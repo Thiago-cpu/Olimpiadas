@@ -9,6 +9,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import { gql, useMutation } from '@apollo/client';
+import AlertContext from '../context/alertContext';
 
 const REMOVE_USER = gql`
   mutation DeleteUserMutation($deleteUserId: String!) {
@@ -20,6 +21,7 @@ const REMOVE_USER = gql`
 
 export default function USure({onClick, name="usuario", id}) {
   if(!id) return "id is necessary"
+  const {setAlert} = React.useContext(AlertContext)
   const [open, setOpen] = React.useState(false);
   const [removeUser, { loading: removeLoading }] = useMutation(REMOVE_USER);
 
@@ -31,8 +33,19 @@ export default function USure({onClick, name="usuario", id}) {
     setOpen(false);
   };
 
-  const handleAgree = () => {
-    removeUser({ variables: { deleteUserId: id } })
+  const handleAgree = async() => {
+    const {data, errors} = await removeUser({ variables: { deleteUserId: id } })
+    if(errors || !data.deleteUser){
+      setAlert({
+        severity: "error",
+        text: "Algo ha ido mal"
+      })
+    } else {
+      setAlert({
+        severity: "success",
+        text: "Usuario eliminado correctamente"
+      })
+    }
     onClick()
   }
 

@@ -5,10 +5,11 @@ import {
   DialogContent,
   Button,
 } from "@mui/material";
-import LoadingButton from "@mui/lab/LoadingButton";
+import AlertContext from "../context/alertContext";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useMutation, gql } from "@apollo/client";
+import { useContext } from "react";
 const ADD_SUCURSAL = gql`
   mutation AddSucursalMutation($addSucursalData: sucursalInput!) {
     addSucursal(data: $addSucursalData) {
@@ -25,6 +26,7 @@ const ADD_SUCURSAL = gql`
   }
 `;
 export default function FormSucursal({idSucursal, handleClose }) {
+  const {setAlert} = useContext(AlertContext)
   const [addSucursal] = useMutation(ADD_SUCURSAL);
   const {
     handleSubmit,
@@ -65,13 +67,23 @@ export default function FormSucursal({idSucursal, handleClose }) {
       });
       const {addSucursal: sucursalData} = data
       if(sucursalData.errors){
-        alert(sucursalData.errors[0].message)
+        setAlert({
+          severity: "error",
+          text: sucursalData.errors[0].message,
+        })
       }
       if(errors){
-        alert("Algo ha salido mal")
+        setAlert({
+          severity: "error",
+          text: "Algo ha salido mal",
+        })
       }
+      console.log(sucursalData.data)
       if(sucursalData.data){
-        alert("Sucursal añadida correctamente")
+        setAlert({
+          severity: "success",
+          text: `La sucursal ${values.name} fue añadida correctamente`,
+        })
         handleClose()
       }
     },
