@@ -241,9 +241,13 @@ export default function UsersTable() {
   }
   
   return (
-    <Container>
+    <Container sx={{
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+    }}>
     <Search onChange={handleSearchChange} label="Buscar sucursal"/>
-    <TableContainer sx={{maxWidth: 700, marginTop: 1}} component={Paper}>
+    <TableContainer sx={{maxWidth: 800, marginTop: 1}} component={Paper}>
       <Table size="small">
         <TableHead>
           <TableRow>

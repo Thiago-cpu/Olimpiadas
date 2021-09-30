@@ -44,6 +44,7 @@ export default function NewSensor({ sucursalName = "Sucursal", id = "" }) {
 
   const {
     handleSubmit,
+    setValues,
     handleBlur,
     handleChange,
     values,
@@ -96,7 +97,10 @@ export default function NewSensor({ sucursalName = "Sucursal", id = "" }) {
   };
 
   const handleScan = (data) => {
-    values.macAddress = data
+    setValues(prevValues => {
+      prevValues.macAddress = data
+      return {...prevValues}
+    })
   };
 
   return (

@@ -84,7 +84,11 @@ export default function UsersTable() {
   }
 
   return (
-    <Container>
+    <Container sx={{
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+    }}>
     <Search styles={{}} onChange={handleSearchChange} label="Buscar usuario"/>
     <TableContainer sx={{maxWidth: 600, marginTop: 1}} component={Paper}>
       <Table size="small">
