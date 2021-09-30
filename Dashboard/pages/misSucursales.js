@@ -29,6 +29,7 @@ import Search from '../components/Search';
 import NewSensor from '../components/NewSensor.modal';
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import AlertContext from '../context/alertContext';
 
 
 const GET_MY_SUCURSALES = gql`
@@ -47,6 +48,7 @@ query MySucursals {
 `;
 
 function CreateRow({row, i, rowsEdits, makeRowEditable, updateSucursal, handleParentSubmit}){
+  const {setAlert} = React.useContext(AlertContext)
   const {
     handleSubmit,
     handleBlur,
@@ -88,9 +90,17 @@ function CreateRow({row, i, rowsEdits, makeRowEditable, updateSucursal, handlePa
           const {updateMySucursal} = data
           const {errors, data:sucursal} = updateMySucursal
           if(errors){
-            return alert(errors[0].message)
+            setAlert({
+              severity: "error",
+              text: errors[0].message
+            })
+          } else {
+            setAlert({
+              severity: "success",
+              text: `La sucursal ${sucursal.name} fue actualizada correctamente`
+            })
+            handleParentSubmit(sucursal)
           }
-          handleParentSubmit(sucursal)
       }
       catch(e){
           console.log(e)
@@ -174,7 +184,7 @@ function CreateRow({row, i, rowsEdits, makeRowEditable, updateSucursal, handlePa
     </>
     }
     <TableCell align="center">
-      <NewSensor name={row.name} id={row.id}/>
+      <NewSensor sucursalName={row.name} id={row.id}/>
     </TableCell>
     <TableCell align="center">
       <Link href={`/sucursal/${row.id}`}>
@@ -241,9 +251,13 @@ export default function UsersTable() {
   }
   
   return (
-    <Container>
+    <Container sx={{
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+    }}>
     <Search onChange={handleSearchChange} label="Buscar sucursal"/>
-    <TableContainer sx={{maxWidth: 700, marginTop: 1}} component={Paper}>
+    <TableContainer sx={{maxWidth: 800, marginTop: 1}} component={Paper}>
       <Table size="small">
         <TableHead>
           <TableRow>

@@ -18,6 +18,10 @@ import SensorsIcon from "@mui/icons-material/Sensors";
 import QrCodeScannerIcon from "@mui/icons-material/QrCodeScanner";
 import { useMutation, gql } from "@apollo/client";
 import QrScanner from "./QrScanner.modal";
+import { useFormik } from "formik";
+import * as Yup from "yup";
+import AlertContext from "../context/alertContext";
+
 
 const ADD_SENSOR = gql`
   mutation AddSensor(
@@ -28,47 +32,77 @@ const ADD_SENSOR = gql`
       data {
         type
       }
+      errors{
+        field
+        message
+      }
     }
   }
 `;
 
 export default function NewSensor({ sucursalName = "Sucursal", id = "" }) {
+  const {setAlert} = React.useContext(AlertContext)
   const [open, setOpen] = React.useState(false);
   const [addSensor] = useMutation(ADD_SENSOR);
-  const [macAddress, setMacAddress] = React.useState("");
-  const [selectValue, setSelectValue] = React.useState("Ingreso");
 
-  const handleSelectChange = (e) => {
-    setSelectValue(e.target.value);
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (
-      macAddress.length < 10 ||
-      macAddress.length > 100 ||
-      (selectValue !== "Ingreso" && selectValue !== "Egreso")
-    ) {
-      return false;
-    }
-    addSensor({
-      variables: {
-        addSensorData: {
-          macAdress: macAddress,
-          type: selectValue,
+  const {
+    handleSubmit,
+    setValues,
+    handleBlur,
+    handleChange,
+    values,
+    errors,
+    touched,
+    isSubmitting,
+  } = useFormik({
+    initialValues: {
+      macAddress: "",
+      type: "Ingreso",
+    },
+    validationSchema: Yup.object({
+      macAddress: Yup.string()
+        .required("Requerido")
+        .min(10, "Mínimo 10 caracteres")
+        .max(100, "Máximo 100 caracteres"),
+      type: Yup.mixed().oneOf(['Ingreso', 'Egreso'])
+        .required("Requerido")
+    }),
+    onSubmit: async() => {
+      const {data, errors} = await addSensor({
+        variables: {
+          addSensorData: {
+            macAdress: values.macAddress,
+            type: values.type,
+          },
+          addSensorSucursalId: id,
         },
-        addSensorSucursalId: id,
-      },
-    });
-    handleClose();
-  };
+      })
+      const {addSensor: sensorData} = data
+      if(errors || sensorData.errors){
+        if(sensorData.errors[0].field === "macAddress"){
+          setAlert({
+            severity: "error",
+            text: "El sensor ya está registrado",
+          })
+        } else {
+          setAlert({
+            severity: "error",
+            text: "No se ha podido añadir el sensor",
+          })
+        }
+      } else {
+        setAlert({
+          severity: "success",
+          text: "Sensor añadido correctamente",
+        })
+        handleClose()
+      }
+    },
+  });
+
 
   const handleClickOpen = () => {
     setOpen(true);
-  };
-
-  const handleMacChange = (e) => {
-    setMacAddress(e.target.value);
   };
 
   const handleClose = () => {
@@ -76,7 +110,10 @@ export default function NewSensor({ sucursalName = "Sucursal", id = "" }) {
   };
 
   const handleScan = (data) => {
-    setMacAddress(data);
+    setValues(prevValues => {
+      prevValues.macAddress = data
+      return {...prevValues}
+    })
   };
 
   return (
@@ -93,10 +130,14 @@ export default function NewSensor({ sucursalName = "Sucursal", id = "" }) {
             <InputLabel id="SelectType">Tipo</InputLabel>
             <Select
               labelId="SelectType"
-              id="select"
-              value={selectValue}
+              name="type"
               label="Tipo"
-              onChange={handleSelectChange}
+              value={values.type}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              disabled={isSubmitting}
+              error={touched.type && Boolean(errors.type)}
+              // helperText={touched.type && errors.type}
             >
               <MenuItem value={"Ingreso"}>Ingreso</MenuItem>
               <MenuItem value={"Egreso"}>Egreso</MenuItem>
@@ -104,11 +145,15 @@ export default function NewSensor({ sucursalName = "Sucursal", id = "" }) {
             <Grid style={{ marginTop: 1 }} container spacing={2}>
               <Grid item xs={8}>
                 <TextField
-                  id="inpMacAdress"
+                  name="macAddress"
                   label="MacAddress"
                   variant="outlined"
-                  value={macAddress}
-                  onChange={handleMacChange}
+                  disabled={isSubmitting}
+                  value={values.macAddress}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  error={touched.macAddress && Boolean(errors.macAddress)}
+                  helperText={touched.macAddress && errors.macAddress}
                 />
               </Grid>
               <Grid item xs={1} alignSelf="center">
@@ -122,7 +167,7 @@ export default function NewSensor({ sucursalName = "Sucursal", id = "" }) {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>Cancelar</Button>
-          <Button onClick={handleSubmit}>Nuevo Sensor</Button>
+          <Button disabled={isSubmitting} onClick={handleSubmit}>Nuevo Sensor</Button>
         </DialogActions>
       </Dialog>
     </div>
