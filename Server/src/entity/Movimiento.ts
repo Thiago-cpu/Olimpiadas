@@ -21,7 +21,7 @@ export class Movimiento extends BaseModel {
     cantidadActual: number
 
     @Field(() => Sucursal)
-    @ManyToOne(() => Sucursal, sucursal => sucursal.movimientos, {nullable: false})
+    @ManyToOne(() => Sucursal, sucursal => sucursal.movimientos, {nullable: false, cascade: true, onDelete:'CASCADE'})
     sucursal: Sucursal
 
     static findLastMove(sucursalId: string){
