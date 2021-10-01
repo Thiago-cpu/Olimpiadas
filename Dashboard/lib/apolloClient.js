@@ -8,16 +8,17 @@ import {parseCookies} from 'nookies'
 import {setContext} from '@apollo/client/link/context'
 
 export const APOLLO_STATE_PROP_NAME = '__APOLLO_STATE__'
-
+const wsUrl = `${process.env.NEXT_PUBLIC_WSS_DOMAIN || 'ws://localhost:4000'}`
+console.log({wsUrl})
 const wsLink = process.browser ? new WebSocketLink({
-  uri: `${process.env.WSS_DOMAIN || 'ws://localhost:4000'}/graphql`,
+  uri: `${wsUrl}/graphql`,
   options: {
     reconnect: true,
   }
 }) : null;
 
 const httpLink = new HttpLink({
-  uri: `${process.env.HTTP_DOMAIN || 'http://localhost:4000'}/graphql`,
+  uri: `${process.env.NEXT_PUBLIC_HTTP_DOMAIN || 'http://localhost:4000'}/graphql`,
   credentials: 'same-origin'
 });
 
