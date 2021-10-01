@@ -10,14 +10,14 @@ import {setContext} from '@apollo/client/link/context'
 export const APOLLO_STATE_PROP_NAME = '__APOLLO_STATE__'
 
 const wsLink = process.browser ? new WebSocketLink({
-  uri: `ws://${process.env.DOMAIN || 'localhost'}:4000/graphql`,
+  uri: `${process.env.WSS_DOMAIN || 'ws://localhost:4000'}/graphql`,
   options: {
     reconnect: true,
   }
 }) : null;
 
 const httpLink = new HttpLink({
-  uri: `http://${process.env.DOMAIN || 'localhost'}:4000/graphql`,
+  uri: `${process.env.HTTP_DOMAIN || 'http://localhost:4000'}/graphql`,
   credentials: 'same-origin'
 });
 
