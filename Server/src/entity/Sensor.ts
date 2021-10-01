@@ -17,6 +17,6 @@ export class Sensor extends BaseModel {
     type: MovimientoEnum
 
     @Field(() => Sucursal)
-    @ManyToOne(() => Sucursal, sucursal => sucursal.sensores)
+    @ManyToOne(() => Sucursal, sucursal => sucursal.sensores,{nullable: false, cascade: true, onDelete: 'CASCADE'})
     sucursal: Sucursal
 }
