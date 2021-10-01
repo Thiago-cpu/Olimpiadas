@@ -78,7 +78,6 @@ export default function FormSucursal({idSucursal, handleClose }) {
           text: "Algo ha salido mal",
         })
       }
-      console.log(sucursalData.data)
       if(sucursalData.data){
         setAlert({
           severity: "success",

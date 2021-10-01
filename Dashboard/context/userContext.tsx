@@ -33,7 +33,6 @@ export function UserContextProvider({children}){
 
     const props = ['isLogged', 'name', 'role']
     const logout = () => {
-        console.log("logout..")
         setUser(defaultValues)
         //destroycookie no funciona la lala lal ala
         destroyCookie(null, 'token')
@@ -44,7 +43,6 @@ export function UserContextProvider({children}){
     }
 
     useEffect(()=>{
-        console.log(localStorage.getItem('isLogged'))
         setUser({
             isLogged: !!localStorage.getItem('isLogged'),
             name: localStorage.getItem('name'),

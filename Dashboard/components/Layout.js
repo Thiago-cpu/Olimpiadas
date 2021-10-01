@@ -10,8 +10,7 @@ import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import CloseIcon from '@mui/icons-material/Close';
 import LoginIcon from '@mui/icons-material/Login';
 import LogoutIcon from '@mui/icons-material/Logout';
 import ListItem from '@mui/material/ListItem';
@@ -23,6 +22,8 @@ import CheckroomIcon from '@mui/icons-material/Checkroom';
 import StorefrontIcon from '@mui/icons-material/Storefront';
 import PeopleIcon from '@mui/icons-material/People';
 import Link from 'next/link'
+import { useRouter } from 'next/router';
+
 const drawerWidth = 240;
 
 const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })(
@@ -55,18 +56,22 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 }));
 
 export default function Layout({children}) {
+  const router = useRouter()
   const theme = useTheme();
   const {user, logout} = React.useContext(UserContext)
   const [open, setOpen] = React.useState(false);
+  const { pathname } = router
 
   const handleDrawerOpen = () => {
     setOpen(true);
   };
-
+  
   const handleDrawerClose = () => {
     setOpen(false);
   };
-
+  
+  if( pathname === '/sucursal/[id]') return children
+    
   return (
     <Box sx={{
         display: 'flex',
@@ -104,9 +109,8 @@ export default function Layout({children}) {
         onBlur={handleDrawerClose}
       >
         <DrawerHeader>
-          <p>Menu</p>
           <IconButton onClick={handleDrawerClose}>
-            {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+            <CloseIcon />
           </IconButton>
         </DrawerHeader>
         <Divider />
@@ -117,7 +121,7 @@ export default function Layout({children}) {
             </ListItemIcon>
             <ListItemText primary={user.isLogged?user.name:"Invitado"} />
           </ListItem>
-          <Link href="/sucursales">
+          <Link href="/">
             <ListItem button onClick={handleDrawerClose}>
                 <ListItemIcon>
                   <StorefrontIcon />

@@ -9,7 +9,6 @@ import {setContext} from '@apollo/client/link/context'
 
 export const APOLLO_STATE_PROP_NAME = '__APOLLO_STATE__'
 const wsUrl = `${process.env.NEXT_PUBLIC_WSS_DOMAIN || 'ws://localhost:4000'}`
-console.log({wsUrl})
 const wsLink = process.browser ? new WebSocketLink({
   uri: `${wsUrl}/graphql`,
   options: {
@@ -36,7 +35,6 @@ const splitLink = process.browser ? split(
 
 const authLink = setContext((request) => {
   const { token } = parseCookies()
-  console.log({token}, "token")
 
   return {
     headers: {
