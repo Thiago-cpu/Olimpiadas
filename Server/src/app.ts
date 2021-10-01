@@ -81,10 +81,16 @@ export async function startServer(){
     await apolloServer.start();
 
     apolloServer.applyMiddleware({app, cors: false});
+    
+    console.log(process.env.PORT)
 
-    httpServer.listen(process.env.PORTWSS || PORT, () =>
-      console.log(`the server is now running on http://localhost:${PORT}/graphql`)
-    );
+    console.log(process.env.mode)
+
+    const port = Number(process.env.PORT) || PORT
+
+    httpServer.listen(port, "0.0.0.0",function() {
+      console.log(`Listening on Port ${port}`);
+    });
 }
 
 
