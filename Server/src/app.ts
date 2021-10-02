@@ -49,7 +49,13 @@ export async function startServer() {
     return res.send({ ok: true, accessToken: createAuthToken(user) });
   });
 
-  await createConnection();
+
+  const connection = await createConnection({
+    type: 'mysql',
+    url: `mysql://${process.env.DB_URL}`,
+    entities: ["src/entity/**/*.ts"],
+  });
+
   const schema = await buildSchema({
     resolvers: [__dirname + "/resolvers/**/*.resolver.{ts,js}"],
     dateScalarMode: "isoDate",

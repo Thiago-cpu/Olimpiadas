@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState, useContext } from "react";
 import {
   Typography,
   Box,
@@ -12,12 +12,14 @@ import {
   Link,
   TextField,
 } from "@mui/material";
-import LoadingButton from '@mui/lab/LoadingButton'
+import LoadingButton from "@mui/lab/LoadingButton";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { gql, useMutation} from '@apollo/client'
-import Router from 'next/router'
+import { gql, useMutation } from "@apollo/client";
+import Router from "next/router";
+import AlertContext from "../context/alertContext";
+import NextLink from "next/link";
 
 const REGISTER = gql`
   mutation Register($registerData: userInput!) {
@@ -31,11 +33,12 @@ const REGISTER = gql`
       }
     }
   }
-`
+`;
 
 export default function Register() {
+  const { setAlert } = useContext(AlertContext);
   const [showPassword, setShowPassword] = useState(false);
-  const [register] = useMutation(REGISTER)
+  const [register] = useMutation(REGISTER);
 
   const {
     handleSubmit,
@@ -60,29 +63,31 @@ export default function Register() {
         .max(12, "máximo 12 caracteres"),
     }),
     onSubmit: async (values) => {
-        try{
-          const { data, errors } = await register({
-            variables: {
-                registerData: {
-                    ...values
-                },
+      try {
+        const { data, errors } = await register({
+          variables: {
+            registerData: {
+              ...values,
             },
-        })
-        const {register: registerData} = data
-        if(!registerData.errors && !errors){
+          },
+        });
+        const { register: registerData } = data;
+        if (!registerData.errors && !errors) {
           //usuario registrado correctamente enviar a login
-          Router.push("/login")
+          Router.push("/login");
         } else {
-          if(registerData.errors) alert(registerData.errors[0].message)
-          
+          if (registerData.errors) {
+            setAlert({
+              severity: "info",
+              text: registerData.errors[0].message,
+            });
+          }
         }
-        }
-        catch(e){
-            console.log(e)
-        }
-  }
+      } catch (e) {
+        console.log(e);
+      }
+    },
   });
-  
 
   const handleClickShowPassword = () => {
     setShowPassword((previousShowPassword) => !previousShowPassword);
@@ -145,19 +150,19 @@ export default function Register() {
               </InputAdornment>
             }
           />
-          <FormHelperText id="password">{
-            touched.password && errors.password
-          }</FormHelperText>
+          <FormHelperText id="password">
+            {touched.password && errors.password}
+          </FormHelperText>
         </FormControl>
 
-        <LoadingButton 
-          type="submit" 
-          loading={isSubmitting} 
-          disabled={isSubmitting} 
-          variant="contained" 
+        <LoadingButton
+          type="submit"
+          loading={isSubmitting}
+          disabled={isSubmitting}
+          variant="contained"
           sx={{ width: "155px", height: "42px" }}
         >
-          Confirmar 
+          Confirmar
         </LoadingButton>
         <div
           style={{
@@ -167,18 +172,17 @@ export default function Register() {
             alignItems: "center",
           }}
         >
-          <Link href="#" underline="hover" variant="caption" mt="0.2em">
-            ¿Ya tienes una cuenta?
-          </Link>
-          <Link href="./login">
-            <LoadingButton 
-              variant="outlined" 
-              sx={{ width: "155px", height: "42px" }}
-              disabled={isSubmitting}
-            >
-              Iniciar Sesión
-            </LoadingButton>
-          </Link>
+          <NextLink href="/login">
+            <Link>
+              <LoadingButton
+                variant="outlined"
+                sx={{ width: "155px", height: "42px" }}
+                disabled={isSubmitting}
+              >
+                Iniciar Sesión
+              </LoadingButton>
+            </Link>
+          </NextLink>
         </div>
       </Container>
     </Box>

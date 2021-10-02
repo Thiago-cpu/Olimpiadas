@@ -1,8 +1,9 @@
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
-import { useState } from 'react';
-import { gql, useSubscription } from '@apollo/client';
-import { initializeApollo, addApolloState } from '../../lib/apolloClient'
+import { Tooltip, Button, Box } from "@mui/material";
+import Typography from "@mui/material/Typography";
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { gql, useSubscription } from "@apollo/client";
+import { initializeApollo, addApolloState } from "../../lib/apolloClient";
+import Link from 'next/link'
 
 const SUBSCRIPTION = gql`
   subscription actualPeople($actualPeopleSucursalId: String!) {
@@ -11,63 +12,79 @@ const SUBSCRIPTION = gql`
       maxCant
     }
   }
-`
+`;
 
-
-export default function Ingreso({id, initialData}) {
-  if(initialData.errors){
-    return <p>{initialData.errors[0].message}</p>
+export default function Ingreso({ id, initialData }) {
+  if (initialData.errors) {
+    return <p>{initialData.errors[0].message}</p>;
   }
-  const { data, loading } = useSubscription(
-    SUBSCRIPTION,
-    {
-    variables: { actualPeopleSucursalId: id }
-    }
-  );
+  const { data, loading } = useSubscription(SUBSCRIPTION, {
+    variables: { actualPeopleSucursalId: id },
+  });
   let cantidadDePersonas, maximaCantidadDePersonas;
-  if(loading) {
-    cantidadDePersonas = initialData.data.cantidadActual
-    maximaCantidadDePersonas = initialData.data.sucursal.capacidadMaxima
+  if (loading) {
+    cantidadDePersonas = initialData.data.cantidadActual;
+    maximaCantidadDePersonas = initialData.data.sucursal.capacidadMaxima;
   } else {
-    cantidadDePersonas = data.actualPeople.cant
-    maximaCantidadDePersonas = data.actualPeople.maxCant
+    cantidadDePersonas = data.actualPeople.cant;
+    maximaCantidadDePersonas = data.actualPeople.maxCant;
   }
 
   const puedeIngresar = cantidadDePersonas < maximaCantidadDePersonas;
-  const personasAretirarse = cantidadDePersonas-maximaCantidadDePersonas+1
-  const colorDeFondo = puedeIngresar ? '#BAF56E' : '#E37B5A';
-  
+  const personasAretirarse = cantidadDePersonas - maximaCantidadDePersonas + 1;
+  const colorDeFondo = puedeIngresar ? "#BAF56E" : "#E37B5A";
+
   return (
     <>
-    <Box
+      <Box
         sx={{
-          width: '100%',
-          height: '100vh',
+          width: "100%",
+          height: "100vh",
           bgcolor: colorDeFondo,
-          textAlign: 'center',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center'
+          textAlign: "center",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
         }}
-    >
-     
-      <Typography variant="h1" gutterBottom component="div">
-          { puedeIngresar ? 'Puedes ingresar' : 'No puedes ingresar'}
-      </Typography>
-      
-      <Typography variant="h4" gutterBottom component="div">
-      { puedeIngresar ? `Hay ${maximaCantidadDePersonas - cantidadDePersonas} espacios restantes.` : `Deberás esperar a que se retire${personasAretirarse>1?`n ${personasAretirarse} personas`:` 1 persona`}`}
-      </Typography>
-    
-    </Box>
-    <style jsx global>{`
+      >
+
+        <Link href="/">
+          <Tooltip color="primary" arrow title="Volver" placement="left">
+            <Button variant="text" sx={{
+              position: "absolute",
+              top:"1em",
+              left:"1em",
+              color:"black"
+              }}>
+              <ArrowBackIcon />
+            </Button>
+          </Tooltip>
+        </Link>
+
+        <Typography variant="h1" gutterBottom component="div">
+          {puedeIngresar ? "Puedes ingresar" : "No puedes ingresar"}
+        </Typography>
+
+        <Typography variant="h4" gutterBottom component="div">
+          {puedeIngresar
+            ? `Hay ${
+                maximaCantidadDePersonas - cantidadDePersonas
+              } espacios restantes.`
+            : `Deberás esperar a que se retire${
+                personasAretirarse > 1
+                  ? `n ${personasAretirarse} personas`
+                  : ` 1 persona`
+              }`}
+        </Typography>
+      </Box>
+      <style jsx global>{`
         body {
           margin: 0;
           padding: 0;
         }
-        `}</style>
+      `}</style>
     </>
-  )
+  );
 }
 
 const GET_INITIAL_DATA = gql`
@@ -84,23 +101,22 @@ const GET_INITIAL_DATA = gql`
       }
     }
   }
-`
+`;
 
-export async function getServerSideProps({params}){
-  const {id} = params
+export async function getServerSideProps({ params }) {
+  const { id } = params;
 
-  const client = initializeApollo()
+  const client = initializeApollo();
   const { data: initialData } = await client.query({
-    query:GET_INITIAL_DATA,
+    query: GET_INITIAL_DATA,
     variables: {
-      lastMoveSucursalId: id
-    }
+      lastMoveSucursalId: id,
+    },
   });
-  console.log(initialData)
   return addApolloState(client, {
     props: {
       id,
-      initialData: initialData.lastMove
+      initialData: initialData.lastMove,
     },
-  })
+  });
 }

@@ -17,26 +17,22 @@ import {
   Container,
   Select
 } from '@mui/material'
-import nookies from 'nookies'
-
 import { deepOrange, deepPurple } from '@mui/material/colors';
 import USure from '../components/DeleteUser.modal';
 import { gql, useQuery, useMutation } from '@apollo/client';
-import { initializeApollo, addApolloState } from '../lib/apolloClient'
 import NewSucursal from '../components/NewSucursal.modal';
 import Search from '../components/Search';
-
-
-
-const headerCell = {
-
-}
+import AlertContext from '../context/alertContext';
 
 const CHANGE_ROLE = gql`
   mutation ChangeRoleMutation($changeRoleData: changeRoleInput!) {
     changeRole(data: $changeRoleData) {
       data {
         id
+      }
+      errors{
+        field,
+        message
       }
     }
   }
@@ -56,14 +52,21 @@ const GET_USERS = gql`
 export default function UsersTable() {
   const {data, loading, error} = useQuery(GET_USERS)
   const arrRows = data?.allUser?.data
+  const {setAlert} = React.useContext(AlertContext)
   const [rows, setRows] = React.useState(arrRows)
   const [changeRole, { loading: changeRoleLoading }] = useMutation(CHANGE_ROLE)
 
-  const handleChangeSelect = (e, id) => {
-    changeRole({variables: {changeRoleData:{
+  const handleChangeSelect = async(e, id) => {
+    const {data, errors} = await changeRole({variables: {changeRoleData:{
       userId: id,
       role: e.target.value
     }}})
+    if(errors || data.changeRole.errors){
+      setAlert({
+        severity: "error",
+        text: "Algo ha ido mal"
+      })
+    }
   }
   
   React.useEffect(()=>{
@@ -84,7 +87,11 @@ export default function UsersTable() {
   }
 
   return (
-    <Container>
+    <Container sx={{
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+    }}>
     <Search styles={{}} onChange={handleSearchChange} label="Buscar usuario"/>
     <TableContainer sx={{maxWidth: 600, marginTop: 1}} component={Paper}>
       <Table size="small">

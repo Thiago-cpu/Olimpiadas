@@ -1,4 +1,4 @@
-import * as React from 'react';
+import * as React from "react";
 import {
   Button,
   Dialog,
@@ -7,14 +7,13 @@ import {
   DialogContent,
   Fab,
   Tooltip,
-} from '@mui/material'
-import { QrReader } from '@blackbox-vision/react-qr-reader';
-import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
+} from "@mui/material";
+import { QrReader } from "@blackbox-vision/react-qr-reader";
+import QrCodeScannerIcon from "@mui/icons-material/QrCodeScanner";
 
-
-export default function QrScanner({handleParentScan}) {
+export default function QrScanner({ handleParentScan }) {
   const [open, setOpen] = React.useState(false);
-  const [result, setResult] = React.useState('')
+  const [result, setResult] = React.useState("");
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -27,10 +26,10 @@ export default function QrScanner({handleParentScan}) {
   const handleResult = (scanResult, err) => {
     if (!!scanResult) {
       setResult(scanResult?.text);
-      handleParentScan(scanResult?.text)
-      handleClose()
+      handleParentScan(scanResult?.text);
+      handleClose();
     }
-  }
+  };
   return (
     <div>
       <Tooltip title="Scanear QR" placement="right" arrow>
@@ -41,12 +40,13 @@ export default function QrScanner({handleParentScan}) {
       <Dialog fullWidth maxWidth="xs" onClose={handleClose} open={open}>
         <DialogTitle>Escaneando QR</DialogTitle>
         <DialogContent>
-        <div>
-          <QrReader
-            onResult={handleResult}
-            style={{ width: '100%' }}
-          />
-        </div>
+          <div>
+            <QrReader
+              onResult={handleResult}
+              style={{ width: "100%" }}
+              constraints={{ facingMode: "environment" }}
+            />
+          </div>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>Cancelar</Button>

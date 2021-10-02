@@ -12,40 +12,41 @@ import {
   Link,
   TextField,
 } from "@mui/material";
-import LoadingButton from '@mui/lab/LoadingButton'
+import LoadingButton from "@mui/lab/LoadingButton";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { gql, useMutation} from '@apollo/client'
-import Router from 'next/router'
-import { setCookie } from 'nookies'
+import { gql, useMutation } from "@apollo/client";
+import Router from "next/router";
+import { setCookie } from "nookies";
 import UserContext from "../context/userContext";
+import NextLink from "next/link";
 
 const LOGIN_MUTATION = gql`
-    mutation Login($loginData: userInput!) {
-  login(data: $loginData) {
-    authToken
-    data {
-      id
-      name
-      role
-      sucursales {
-        name
+  mutation Login($loginData: userInput!) {
+    login(data: $loginData) {
+      authToken
+      data {
         id
+        name
+        role
+        sucursales {
+          name
+          id
+        }
+      }
+      errors {
+        field
+        message
       }
     }
-    errors {
-      field
-      message
-    }
   }
-}
-`
+`;
 
 export default function Login() {
-  const {setUser} = useContext(UserContext)
+  const { setUser } = useContext(UserContext);
   const [showPassword, setShowPassword] = useState(false);
-  const [login] = useMutation(LOGIN_MUTATION)
+  const [login] = useMutation(LOGIN_MUTATION);
   const {
     handleSubmit,
     handleBlur,
@@ -69,35 +70,32 @@ export default function Login() {
         .max(12, "Máximo 12 caracteres"),
     }),
     onSubmit: async (values) => {
-        try{
-            const { data } = await login({
-                variables: {
-                    loginData: {
-                        ...values
-                    },
-                },
-            })
-            if(!data.login?.errors?.length){
-              setCookie(null, 'token', data.login.authToken, {
-                  maxAge: 30 * 24 * 60 * 60,
-                  path: '/',
-              })
-              const {id, role, name} = data.login.data
-              setUser({
-                isLogged: true,
-                role,
-                name
-              })
-              Router.push("/misSucursales")
-              
-            }
+      try {
+        const { data } = await login({
+          variables: {
+            loginData: {
+              ...values,
+            },
+          },
+        });
+        if (!data.login?.errors?.length) {
+          setCookie(null, "token", data.login.authToken, {
+            maxAge: 30 * 24 * 60 * 60,
+            path: "/",
+          });
+          const { id, role, name } = data.login.data;
+          setUser({
+            isLogged: true,
+            role,
+            name,
+          });
+          Router.push("/misSucursales");
         }
-        catch(e){
-            console.log(e)
-        }
-  }
+      } catch (e) {
+        console.log(e);
+      }
+    },
   });
-  
 
   const handleClickShowPassword = () => {
     setShowPassword((previousShowPassword) => !previousShowPassword);
@@ -159,9 +157,9 @@ export default function Login() {
               </InputAdornment>
             }
           />
-          <FormHelperText id="password">{
-            touched.password && errors.password
-          }</FormHelperText>
+          <FormHelperText id="password">
+            {touched.password && errors.password}
+          </FormHelperText>
         </FormControl>
 
         <div
@@ -172,25 +170,27 @@ export default function Login() {
             alignItems: "center",
           }}
         >
-          <LoadingButton 
+          <LoadingButton
             type="submit"
-            variant="contained" 
+            variant="contained"
             sx={{ width: "155px", height: "42px" }}
             loading={isSubmitting}
             disabled={isSubmitting}
-            
-        >
+          >
             Confirmar
           </LoadingButton>
-          <Link href="#" underline="hover" variant="caption" mt="0.2em">
-            ¿Olvidaste la contraseña?
-          </Link>
         </div>
-        <Link href="./register">
-          <LoadingButton disabled={isSubmitting} variant="outlined" sx={{ width: "155px", height: "42px" }}>
-            Registrate
-          </LoadingButton>
-        </Link>
+        <NextLink href="/register">
+          <Link>
+            <LoadingButton
+              disabled={isSubmitting}
+              variant="outlined"
+              sx={{ width: "155px", height: "42px" }}
+            >
+              Registrate
+            </LoadingButton>
+          </Link>
+        </NextLink>
       </Container>
     </Box>
   );

@@ -8,16 +8,16 @@ import {parseCookies} from 'nookies'
 import {setContext} from '@apollo/client/link/context'
 
 export const APOLLO_STATE_PROP_NAME = '__APOLLO_STATE__'
-
+const wsUrl = `${process.env.NEXT_PUBLIC_WSS_DOMAIN || 'ws://localhost:4000'}`
 const wsLink = process.browser ? new WebSocketLink({
-  uri: `ws://${process.env.DOMAIN || 'localhost'}:4000/graphql`,
+  uri: `${wsUrl}/graphql`,
   options: {
     reconnect: true,
   }
 }) : null;
 
 const httpLink = new HttpLink({
-  uri: `http://${process.env.DOMAIN || 'localhost'}:4000/graphql`,
+  uri: `${process.env.NEXT_PUBLIC_HTTP_DOMAIN || 'http://localhost:4000'}/graphql`,
   credentials: 'same-origin'
 });
 
@@ -35,7 +35,6 @@ const splitLink = process.browser ? split(
 
 const authLink = setContext((request) => {
   const { token } = parseCookies()
-  console.log({token}, "token")
 
   return {
     headers: {
