@@ -6,6 +6,8 @@ import { newError } from '../utils/newError';
 import { MovimientoEnum } from '../enums/movimiento.enum';
 import { PubSubEngine } from "graphql-subscriptions";
 import { Sucursal } from '../entity/Sucursal';
+import { isMySucursal } from "../decorators/isMySucursal";
+import { query } from "express";
 
 @ObjectType()
 class movimientoResponse extends baseResponse{
@@ -44,6 +46,23 @@ export class movimientoResolver{
       ): Notification{
             return {cant: message.cant, maxCant: message.maxCant , date: new Date()}
     }
+
+    @Authorized()
+    @isMySucursal()
+    @Query(() => movimientosResponse)
+    async entriesByDate(
+        @Arg('sucursalId') sucursalId: string,
+        @Arg('skip',{nullable: true}) skip: number,
+        @Arg('limit') limit: number
+    ): Promise<movimientosResponse>{
+        const moves = await Movimiento.moves(sucursalId, skip, limit)
+        console.log(moves)
+        return {data: await Movimiento.find()}
+    }
+
+    // @Authorized()
+    // @isMySucursal()
+    // @query(() => )
 
     @Query(() => movimientoResponse)
     async lastMove(@Arg('sucursalId') sucursalId: string): Promise<movimientoResponse>{

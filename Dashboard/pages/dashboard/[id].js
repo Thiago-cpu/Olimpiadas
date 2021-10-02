@@ -6,6 +6,7 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
+import { initializeApollo, addApolloState } from "../../lib/apolloClient";
 import {
   Button,
   Card,
@@ -28,7 +29,8 @@ import {
 } from "recharts";
 import Link from "next/link";
 import { useContext } from "react";
-import userContext from "../../context/userContext"
+import userContext from "../../context/userContext";
+import { useSubscription, gql } from "@apollo/client";
 
 function createData(fecha, max) {
   return { fecha, max };
@@ -42,15 +44,43 @@ const rows = [
   createData("17 SEP", 40),
 ];
 
-export default function Dashboard() {
-  const {user}= useContext(userContext)
+const SUBSCRIPTION = gql`
+  subscription actualPeople($actualPeopleSucursalId: String!) {
+    actualPeople(sucursalId: $actualPeopleSucursalId) {
+      cant
+      maxCant
+    }
+  }
+`;
+
+const MOVIMIENTOS = gql`
+  query moves($SucursalId: String!) {
+    moves(sucursalId: $SucursalId) {
+      data {
+        timestamp
+        cantidad
+      }
+    }
+  }
+`;
+
+export default function Dashboard({ id, initialData }) {
+  console.log(initialData)
+  if (initialData.errors) {
+    return <p>{initialData.errors[0].message}</p>;
+  }
+  const { data: subData } = useSubscription(SUBSCRIPTION, {
+    variables: { actualPeopleSucursalId: id },
+  });
+
+  const { user } = useContext(userContext);
 
   const data = [
-    { name: "9:00", Clientes: 10 },
-    { name: "10:00", Clientes: 12 },
-    { name: "11:00", Clientes: 24 },
-    { name: "12:00", Clientes: 40 },
-    { name: "13:00", Clientes: 30 },
+    { time: 1602450000000, clientes: 10 },
+    { time: 1602450300000, clientes: 11 },
+    { time: 1602452100000, clientes: 12 },
+    { time: 1602452160000, clientes: 11 },
+    { time: 1602452400000, clientes: 10 },
   ];
 
   return (
@@ -102,7 +132,11 @@ export default function Dashboard() {
       <Card sx={{ flexBasis: "16rem", flexGrow: 1, height: "fit-content" }}>
         <CardHeader
           title="Concurrencia actual"
-          subheader="22 Septiembre, 2021"
+          subheader={`${new Intl.DateTimeFormat("es-AR", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          }).format(new Date())}`}
         />
 
         <CardContent sx={{ padding: "0" }}>
@@ -122,7 +156,9 @@ export default function Dashboard() {
                   variant="subtitle2"
                   sx={{ color: "text.secondary" }}
                 >
-                  20
+                  {subData
+                    ? subData.actualPeople.cant
+                    : initialData.data.cantidadActual}
                 </Typography>
               </Box>
             </ListItem>
@@ -139,14 +175,16 @@ export default function Dashboard() {
                   variant="subtitle2"
                   sx={{ color: "text.secondary" }}
                 >
-                  60
+                  {subData
+                    ? subData.actualPeople.maxCant
+                    : initialData.data.sucursal.capacidadMaxima}
                 </Typography>
               </Box>
             </ListItem>
           </List>
         </CardContent>
         <CardActions>
-          <Link href="/ingreso">
+          <Link href={`/sucursal/${id}`}>
             <Button size="large" component="a">
               Ver pantalla de ingreso
             </Button>
@@ -161,15 +199,49 @@ export default function Dashboard() {
               data={data}
               margin={{ top: 5, right: 5, bottom: 5, left: 0 }}
             >
-              <Line type="monotone" dataKey="Clientes" stroke="#8884d8" />
+              <Line type="monotone" label={3} dataKey="clientes" stroke="#8884d8" />
               <CartesianGrid stroke="#ccc" strokeDasharray="5 5" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
+              <XAxis dataKey="time" name="Tiempo" scale='time' tickFormatter={timestamp => new Intl.DateTimeFormat('es-AR', {hour: "2-digit", minute: "2-digit"}).format(new Date(timestamp))}/>
+              <YAxis dataKey="clientes" name="Clientes"/>
+              <Tooltip formatter={timestamp => new Intl.DateTimeFormat('es-AR', {hour: "2-digit", minute: "2-digit"}).format(new Date(timestamp))} />
             </LineChart>
           </ResponsiveContainer>
         </CardContent>
       </Card>
     </Box>
   );
+}
+
+const GET_INITIAL_DATA = gql`
+  query lastMove($lastMoveSucursalId: String!) {
+    lastMove(sucursalId: $lastMoveSucursalId) {
+      data {
+        sucursal {
+          capacidadMaxima
+        }
+        cantidadActual
+      }
+      errors {
+        message
+      }
+    }
+  }
+`;
+
+export async function getServerSideProps({ params }) {
+  const { id } = params;
+
+  const client = initializeApollo();
+  const { data: initialData } = await client.query({
+    query: GET_INITIAL_DATA,
+    variables: {
+      lastMoveSucursalId: id,
+    },
+  });
+  return addApolloState(client, {
+    props: {
+      id,
+      initialData: initialData.lastMove,
+    },
+  });
 }

@@ -165,7 +165,7 @@ export default function CreateRow({row, i, rowsEdits, makeRowEditable, updateSuc
       </Link>
     </TableCell>
     <TableCell align="center">
-      <Link href={`/dashboard`}>
+      <Link href={`/dashboard/${row.id}`}>
         <Tooltip title="Metricas" placement="right">
         <Fab color="primary">
           <TrendingUpIcon/>

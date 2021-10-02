@@ -1,6 +1,8 @@
 import  Router  from 'next/router';
 import { destroyCookie, setCookie } from 'nookies';
 import { createContext, useEffect, useState } from "react";
+import {initializeApollo} from '../lib/apolloClient'
+
 interface UserInterface {
     isLogged: boolean,
     name: string,
@@ -34,12 +36,12 @@ export function UserContextProvider({children}){
     const props = ['isLogged', 'name', 'role']
     const logout = () => {
         setUser(defaultValues)
-        //destroycookie no funciona la lala lal ala
-        destroyCookie(null, 'token')
         props.forEach(prop=>{
             localStorage.removeItem(prop)
         })
         Router.push('/login')
+        destroyCookie(null, 'token')
+        initializeApollo().cache.reset()
     }
 
     useEffect(()=>{
