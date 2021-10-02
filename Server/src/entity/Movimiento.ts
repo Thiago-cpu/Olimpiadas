@@ -45,16 +45,16 @@ export class Movimiento extends BaseModel {
   }
 
   // select COUNT(movimiento.type), DATE(movimiento.createdAt) from movimiento where movimiento.type = 'Ingreso' GROUP BY DATE(movimiento.createdAt)
-  static moves(sucursalId: string, skip: number = 0, limit: number = 10) {
+  static moves(sucursalId: string, skip: number = 0, take: number = 10) {
     return this.createQueryBuilder("move")
-      .select("COUNT(move.type)", "cantidad")
+      .select("COUNT(move.type)", "entries")
       .addSelect("DATE(move.createdAt)", "fecha")
       .where("move.sucursalId = :sucursalId", {sucursalId})
       .andWhere("move.type = 'Ingreso'")
       .groupBy("DATE(move.createdAt)")
       .orderBy("move.createdAt", "DESC")
-      .offset(skip)
-      .limit(limit)
+      .skip(skip)
+      .take(take)
       .getRawMany()
   }
 }
