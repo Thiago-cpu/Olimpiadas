@@ -24,7 +24,6 @@ query Sucursales {
 
 const IndexPage = () => {
   const { loading, error, data } = useQuery(SUCURSALES)
-  console.log({data})
   return (
  <Box>
    <Grid  container spacing={2}>
@@ -45,9 +44,9 @@ const IndexPage = () => {
                 {name}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Capacidad máxima: {capacidadMaxima}
-                Localización: {localizacion}
-                Encargado: {encargadoName}
+                Capacidad máxima: {capacidadMaxima} <br/>
+                Localización: {localizacion} <br/>
+                Encargado: {encargadoName} <br/>
               </Typography>
             </CardContent>
             <CardActions>

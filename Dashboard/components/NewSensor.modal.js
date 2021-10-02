@@ -14,7 +14,7 @@ import {
   TextField,
   Grid,
 } from "@mui/material";
-import AddIcon from '@mui/icons-material/Add';
+import SensorsIcon from '@mui/icons-material/Sensors';
 import { useMutation, gql } from "@apollo/client";
 import QrScanner from "./QrScanner.modal";
 import { useFormik } from "formik";
@@ -119,7 +119,7 @@ export default function NewSensor({ sucursalName = "Sucursal", id = "" }) {
     <div>
       <Tooltip title="Añadir Sensor" placement="right" arrow>
         <Fab color="primary" aria-label="add" onClick={handleClickOpen}>
-          <AddIcon />
+          <SensorsIcon />
         </Fab>
       </Tooltip>
       <Dialog onClose={handleClose} open={open}>
