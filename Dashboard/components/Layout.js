@@ -18,10 +18,10 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import UserContext from "../context/userContext";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import CheckroomIcon from '@mui/icons-material/Checkroom';
+import VpnKeyIcon from '@mui/icons-material/VpnKey';
 import StorefrontIcon from '@mui/icons-material/Storefront';
 import PeopleIcon from '@mui/icons-material/People';
-import Link from 'next/link'
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 
 const drawerWidth = 240;
@@ -54,6 +54,11 @@ const DrawerHeader = styled('div')(({ theme }) => ({
   ...theme.mixins.toolbar,
   justifyContent: 'flex-end',
 }));
+
+const DrawerLink = styled('a')`
+  text-decoration: none;
+  color: inherit;
+`
 
 export default function Layout({children}) {
   const router = useRouter()
@@ -109,44 +114,50 @@ export default function Layout({children}) {
         onBlur={handleDrawerClose}
       >
         <DrawerHeader>
-          <IconButton onClick={handleDrawerClose}>
-            <CloseIcon />
-          </IconButton>
-        </DrawerHeader>
-        <Divider />
-        <List>
           <ListItem>
             <ListItemIcon>
               <AccountCircleIcon/>
             </ListItemIcon>
             <ListItemText primary={user.isLogged?user.name:"Invitado"} />
           </ListItem>
-          <Link href="/">
-            <ListItem button onClick={handleDrawerClose}>
-                <ListItemIcon>
-                  <StorefrontIcon />
-                </ListItemIcon>
-                <ListItemText primary={"Sucursales"} />
-            </ListItem>
+          <IconButton onClick={handleDrawerClose}>
+            <CloseIcon />
+          </IconButton>
+        </DrawerHeader>
+        <Divider />
+        <List>
+          <Link href="/" passHref={true}>
+            <DrawerLink>
+              <ListItem button onClick={handleDrawerClose}>
+                  <ListItemIcon>
+                    <StorefrontIcon />
+                  </ListItemIcon>
+                  <ListItemText primary={"Sucursales"} />
+              </ListItem>
+            </DrawerLink>
           </Link>
           {user.isLogged &&
           <>
-          <Link href="/misSucursales">
-            <ListItem button onClick={handleDrawerClose}>
-                <ListItemIcon>
-                  <StorefrontIcon />
-                </ListItemIcon>
-                <ListItemText primary={"Mis Sucursales"} />
-            </ListItem>
+          <Link href="/misSucursales" passHref={true}>
+            <DrawerLink>
+              <ListItem button onClick={handleDrawerClose}>
+                  <ListItemIcon>
+                    <StorefrontIcon />
+                  </ListItemIcon>
+                  <ListItemText primary={"Mis Sucursales"} />
+              </ListItem>
+            </DrawerLink>
           </Link>
           {user.role === "Admin" &&
           <Link href="/users">
-          <ListItem button onClick={handleDrawerClose}>
-            <ListItemIcon>
-              <PeopleIcon />
-            </ListItemIcon>
-            <ListItemText primary={"Usuarios"} />
-          </ListItem>
+            <DrawerLink>
+              <ListItem button onClick={handleDrawerClose}>
+                <ListItemIcon>
+                  <PeopleIcon />
+                </ListItemIcon>
+                <ListItemText primary={"Usuarios"} />
+              </ListItem>
+            </DrawerLink>
           </Link>
           
           }
@@ -164,21 +175,25 @@ export default function Layout({children}) {
           </ListItem>
           :
           <>
-          <Link sx={{}} href="/login">
-            <ListItem button onClick={handleDrawerClose}>
-              <ListItemIcon>
-                <LoginIcon />
-              </ListItemIcon>
-              <ListItemText primary={"Login"} />
-            </ListItem>
+          <Link href="/login" passHref={true}>
+            <DrawerLink>
+              <ListItem button onClick={handleDrawerClose}>
+                <ListItemIcon>
+                  <LoginIcon />
+                </ListItemIcon>
+                <ListItemText primary={"Login"} />
+              </ListItem>
+            </DrawerLink>
           </Link>
-          <Link sx={{}} href="/register">
-            <ListItem button onClick={handleDrawerClose}>
-              <ListItemIcon>
-                <CheckroomIcon />
-              </ListItemIcon>
-              <ListItemText primary={"Register"} />
-            </ListItem>
+          <Link href="/register" passHref={true}>
+            <DrawerLink>
+              <ListItem button onClick={handleDrawerClose}>
+                <ListItemIcon>
+                  <VpnKeyIcon />
+                </ListItemIcon>
+                <ListItemText primary={"Register"} />
+              </ListItem>
+            </DrawerLink>
           </Link>
           </>
 
