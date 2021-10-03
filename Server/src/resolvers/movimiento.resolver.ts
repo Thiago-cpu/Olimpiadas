@@ -17,15 +17,17 @@ import {
   Args,
 } from "type-graphql";
 import { baseResponse } from "../baseTypes/baseResponse.response";
-import { Movimiento } from "../entity/Movimiento";
+import { Movimiento } from '../entity/Movimiento';
 import { Sensor } from "../entity/Sensor";
 import { newError } from "../utils/newError";
-import { MovimientoEnum } from "../enums/movimiento.enum";
+import { MovimientoEnum } from '../enums/movimiento.enum';
 import { PubSubEngine } from "graphql-subscriptions";
 import { Sucursal } from "../entity/Sucursal";
 import { isMySucursal } from "../decorators/isMySucursal";
 import { query } from "express";
 import PaginationArgs from './types/movimiento.input';
+import { Role } from '../enums/role.enum';
+import { addMovesPastMonthArgs } from './types/movimiento.input';
 
 @ObjectType()
 class movimientoResponse extends baseResponse {
@@ -157,6 +159,71 @@ export class movimientoResolver {
     } catch (err) {
       return newError("Error", "Ha ocurrido un error al añadir el movimiento");
     }
+  }
+
+  @Authorized(Role.Admin)
+  @Mutation(()=>Boolean)
+  async addMovimientosAlongPastMonth(@Args() {minClients, sucursalId, maxClients, timeShopOpen, timeShopClose}: addMovesPastMonthArgs): Promise<Boolean>{
+    const existSucursal = await Sucursal.findOne(sucursalId)
+    if(!existSucursal) return false
+    
+    const today = new Date()
+
+    const firstDay = new Date(today.getFullYear(),today.getMonth()-1, 1)
+    let day = new Date(firstDay)
+    const lastDay = new Date(today.getFullYear(),today.getMonth(),0)
+
+    const input = []
+    while(day <= lastDay){
+      const randClients = Math.trunc((Math.random() * (maxClients - minClients)) + minClients + 1)
+
+      const startDay = new Date(day)
+      startDay.setHours(timeShopOpen)
+
+      const endDay = new Date(day)
+      endDay.setHours(timeShopClose)
+
+      const jornadaMinutes = (endDay.getHours() - startDay.getHours()) * 60
+
+      const maxWaitForMove = Math.trunc(jornadaMinutes / randClients)
+
+      let actualClients = 0
+      let actualMoment = new Date(startDay)
+      let totalMoves = randClients*2
+      for (let i = 1; i<=totalMoves; i++){
+        const waitForMove = Math.trunc((Math.random() * maxWaitForMove) + 1 )
+        let typeMove;
+        let movesLeft = totalMoves - i + 1
+        if(actualClients){
+          if(actualClients === existSucursal.capacidadMaxima || movesLeft === actualClients){
+            typeMove = MovimientoEnum.Egreso
+          } else {
+            Math.random()>0.5
+            ? typeMove = MovimientoEnum.Ingreso
+            : typeMove = MovimientoEnum.Egreso
+          }
+        } else {
+          if(i == totalMoves){
+            break;
+          }
+          typeMove = MovimientoEnum.Ingreso
+        }
+        actualMoment.setMinutes(actualMoment.getMinutes()+waitForMove)
+        actualClients += typeMove === MovimientoEnum.Ingreso
+          ? 1
+          : -1
+        
+        input.push({
+          createdAt: new Date(actualMoment),
+          type: typeMove,
+          sucursal: existSucursal,
+          cantidadActual: actualClients,
+        });
+      }
+      day = new Date(day.getFullYear(), day.getMonth(), day.getDate()+1)
+    }
+    await Movimiento.insert(input)
+    return true
   }
 }
 const calcularCantidadActual = async (
