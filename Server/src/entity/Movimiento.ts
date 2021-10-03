@@ -48,6 +48,7 @@ export class Movimiento extends BaseModel {
   static moves(sucursalId: string, skip: number = 0, take: number = 10) {
     return this.createQueryBuilder("move")
       .select("COUNT(move.type)", "entries")
+      .addSelect("move.id", "id")
       .addSelect("DATE(move.createdAt)", "fecha")
       .where("move.sucursalId = :sucursalId", {sucursalId})
       .andWhere("move.type = 'Ingreso'")
