@@ -21,6 +21,7 @@ import Router from "next/router";
 import { setCookie } from "nookies";
 import UserContext from "../context/userContext";
 import NextLink from "next/link";
+import AlertContext from "../context/alertContext";
 
 const LOGIN_MUTATION = gql`
   mutation Login($loginData: userInput!) {
@@ -44,6 +45,7 @@ const LOGIN_MUTATION = gql`
 `;
 
 export default function Login() {
+  const { setAlert } = useContext(AlertContext);
   const { setUser } = useContext(UserContext);
   const [showPassword, setShowPassword] = useState(false);
   const [login] = useMutation(LOGIN_MUTATION);
@@ -90,9 +92,17 @@ export default function Login() {
             name,
           });
           Router.push("/misSucursales");
+        } else {
+          setAlert({
+          severity: "error",
+          text: "Las credenciales no coinciden",
+        });
         }
       } catch (e) {
-        console.log(e);
+        setAlert({
+          severity: "error",
+          text: "Algo ha ido mal, intentelo nuevamente",
+        });
       }
     },
   });

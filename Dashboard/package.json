@@ -13,6 +13,8 @@
     "@mui/icons-material": "^5.0.0",
     "@mui/lab": "^5.0.0-alpha.47",
     "@mui/material": "^5.0.0",
+    "@mui/x-data-grid": "^5.0.0-beta.2",
+    "@mui/x-data-grid-generator": "^5.0.0-beta.2",
     "deepmerge": "^4.2.2",
     "formik": "^2.2.9",
     "graphql": "^15.3.0",

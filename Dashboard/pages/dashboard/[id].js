@@ -1,11 +1,4 @@
 import * as React from "react";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import Paper from "@mui/material/Paper";
 import { initializeApollo, addApolloState } from "../../lib/apolloClient";
 import {
   Button,
@@ -31,6 +24,7 @@ import Link from "next/link";
 import { useContext } from "react";
 import userContext from "../../context/userContext";
 import { useSubscription, gql } from "@apollo/client";
+import EntriesByDate from "../../components/entriesByDate";
 
 function createData(fecha, max) {
   return { fecha, max };
@@ -65,7 +59,6 @@ const MOVIMIENTOS = gql`
 `;
 
 export default function Dashboard({ id, initialData }) {
-  console.log(initialData)
   if (initialData.errors) {
     return <p>{initialData.errors[0].message}</p>;
   }
@@ -90,7 +83,6 @@ export default function Dashboard({ id, initialData }) {
         flexWrap: "wrap",
         columnGap: "1em",
         rowGap: "1em",
-        paddingTop: "3rem",
         paddingLeft: "1rem",
         paddingRight: "1rem",
       }}
@@ -102,32 +94,7 @@ export default function Dashboard({ id, initialData }) {
         </Typography>
       </Box>
 
-      <Paper sx={{ padding: "1em", flexBasis: "25rem", flexGrow: 3 }}>
-        <Typography variant="h6">Datos históricos</Typography>
-        <TableContainer>
-          <Table aria-label="simple table">
-            <TableHead>
-              <TableRow>
-                <TableCell>Fecha</TableCell>
-                <TableCell align="right">Máximo de clientes</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {rows.map((row) => (
-                <TableRow
-                  key={row.fecha}
-                  sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-                >
-                  <TableCell component="th" scope="row">
-                    {row.fecha}
-                  </TableCell>
-                  <TableCell align="right">{row.max}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Paper>
+      <EntriesByDate sucursalId={id}/>
 
       <Card sx={{ flexBasis: "16rem", flexGrow: 1, height: "fit-content" }}>
         <CardHeader
@@ -184,7 +151,7 @@ export default function Dashboard({ id, initialData }) {
           </List>
         </CardContent>
         <CardActions>
-          <Link href={`/sucursal/${id}`}>
+          <Link href={`/sucursal/${id}`} passHref>
             <Button size="large" component="a">
               Ver pantalla de ingreso
             </Button>
