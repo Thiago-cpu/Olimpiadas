@@ -10,6 +10,8 @@ import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import { gql, useMutation } from '@apollo/client';
 import AlertContext from '../context/alertContext';
+import { initializeApollo } from '../lib/apolloClient';
+import {GET_USERS} from '../pages/users'
 
 const REMOVE_USER = gql`
   mutation DeleteUserMutation($deleteUserId: String!) {
@@ -19,11 +21,16 @@ const REMOVE_USER = gql`
 
 
 
-export default function USure({onClick, name="usuario", id}) {
-  if(!id) return "id is necessary"
+export default function USure({onClick, user}) {
+  if(!user) return "user is necessary"
   const {setAlert} = React.useContext(AlertContext)
   const [open, setOpen] = React.useState(false);
-  const [removeUser, { loading: removeLoading }] = useMutation(REMOVE_USER);
+  const [removeUser, { loading: removeLoading }] = useMutation(REMOVE_USER, {
+    refetchQueries: [
+      GET_USERS,
+      'allUser'
+    ],
+  });
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -34,7 +41,7 @@ export default function USure({onClick, name="usuario", id}) {
   };
 
   const handleAgree = async() => {
-    const {data, errors} = await removeUser({ variables: { deleteUserId: id } })
+    const {data, errors} = await removeUser({ variables: { deleteUserId: user.id } })
     if(errors || !data.deleteUser){
       setAlert({
         severity: "error",
@@ -43,10 +50,10 @@ export default function USure({onClick, name="usuario", id}) {
     } else {
       setAlert({
         severity: "success",
-        text: "Usuario eliminado correctamente"
+        text: `${user.name} ha sido eliminado correctamente`
       })
     }
-    onClick()
+    onClick(user.id)
   }
 
   return (
@@ -63,7 +70,7 @@ export default function USure({onClick, name="usuario", id}) {
         aria-describedby="alert-dialog-description"
       >
         <DialogTitle id="alert-dialog-title">
-          ¿Estás seguro de querer eliminar a {name}?
+          ¿Estás seguro de querer eliminar a {user.name}?
         </DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">

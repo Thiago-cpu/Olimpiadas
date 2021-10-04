@@ -23,6 +23,7 @@ import { gql, useQuery, useMutation } from '@apollo/client';
 import NewSucursal from '../components/NewSucursal.modal';
 import Search from '../components/Search';
 import AlertContext from '../context/alertContext';
+import { initializeApollo } from '../lib/apolloClient';
 
 const CHANGE_ROLE = gql`
   mutation ChangeRoleMutation($changeRoleData: changeRoleInput!) {
@@ -37,7 +38,7 @@ const CHANGE_ROLE = gql`
     }
   }
 `
-const GET_USERS = gql`
+export const GET_USERS = gql`
   query allUser {
     allUser {
       data {
@@ -56,22 +57,39 @@ export default function UsersTable() {
   const [rows, setRows] = React.useState(arrRows)
   const [changeRole, { loading: changeRoleLoading }] = useMutation(CHANGE_ROLE)
 
-  const handleChangeSelect = async(e, id) => {
-    const {data, errors} = await changeRole({variables: {changeRoleData:{
-      userId: id,
-      role: e.target.value
-    }}})
+  const handleChangeSelect = async(e, user) => {
+    const {data, errors} = await changeRole({
+      variables: {
+        changeRoleData:{
+          userId: user.id,
+          role: e.target.value
+        }
+      }
+    })
     if(errors || data.changeRole.errors){
       setAlert({
         severity: "error",
         text: "Algo ha ido mal"
       })
+    } else {
+      initializeApollo().writeFragment({
+        id: initializeApollo().cache.identify(user),
+        fragment: gql`
+          fragment MyUser on User {
+            role
+          }
+        `,
+        data: {
+          role: e.target.value,
+        },
+      });
     }
   }
   
   React.useEffect(()=>{
     setRows(data?.allUser?.data)
   }, [data,setRows])
+
   if(loading) return <CircularProgress />
   if (error) return <p>{error.message}</p>
   const handleSearchChange = (data) => {
@@ -112,7 +130,7 @@ export default function UsersTable() {
               sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
             >
               <TableCell sx={{width: 50}} align="center" component="th" scope="row">
-                <USure onClick={() => {removeRow(row.id)}} name={row.name} id={row.id}/>
+                <USure onClick={removeRow} user={row} />
               </TableCell>
               <TableCell sx={{width: 50}} align="center">
                 {i+1}
@@ -129,9 +147,9 @@ export default function UsersTable() {
                       labelId="demo-simple-select-label"
                       id="demo-simple-select"
                       disabled={changeRoleLoading}
-                      defaultValue={row.role}
+                      value={row.role}
                       label="Role"
-                      onChange={(e) => {handleChangeSelect(e, row.id)}}
+                      onChange={(e) => {handleChangeSelect(e, row)}}
                     >
                       <MenuItem value={'Admin'}>Admin</MenuItem>
                       <MenuItem value={'Encargado'}>Encargado</MenuItem>
