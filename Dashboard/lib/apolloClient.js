@@ -48,7 +48,22 @@ function createApolloClient() {
   return new ApolloClient({
     ssrMode: typeof window === 'undefined',
     link: authLink.concat(splitLink),
-    cache: new InMemoryCache(),
+    cache: new InMemoryCache({
+      typePolicies: {
+        Query: {
+          fields: {
+            entriesByDate:{
+                keyArgs: ["sucursalId"],
+                merge(existing = {data: []}, incoming) {
+                  const newObject = {...existing}
+                  newObject.data = [...newObject.data, ...incoming.data]
+                  return newObject;
+                }
+            }
+          }
+        }
+      }
+    }),
   })
 }
 

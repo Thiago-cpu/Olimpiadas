@@ -25,10 +25,10 @@ import { MovimientoEnum } from '../enums/movimiento.enum';
 import { PubSubEngine } from "graphql-subscriptions";
 import { Sucursal } from "../entity/Sucursal";
 import { isMySucursal } from "../decorators/isMySucursal";
-import { query } from "express";
 import PaginationArgs from './types/movimiento.input';
 import { Role } from '../enums/role.enum';
 import { addMovesPastMonthArgs } from './types/movimiento.input';
+import UUID from 'graphql-type-uuid';
 
 @ObjectType()
 class movimientoResponse extends baseResponse {
@@ -42,7 +42,10 @@ class movimientosResponse extends baseResponse {
 }
 
 @ObjectType()
-class entriesOfDate {
+class entriesOfDate{
+  @Field(() => UUID)
+  id: string
+
   @Field(() => Int)
   entries: number
 
@@ -90,7 +93,7 @@ export class movimientoResolver {
   ): Promise<entriesByDateResponse> {
     try {
       const moves = await Movimiento.moves(sucursalId, skip, take);
-      return { data: moves };
+      return { data: moves};
     } catch (error) {
       console.log(error)
       return newError("moves", "Algo fue mal")
