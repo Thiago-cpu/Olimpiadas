@@ -16,6 +16,7 @@ import {
   Query,
   Args,
 } from "type-graphql";
+import { Between } from "typeorm";
 import { baseResponse } from "../baseTypes/baseResponse.response";
 import { Movimiento } from '../entity/Movimiento';
 import { Sensor } from "../entity/Sensor";
@@ -41,7 +42,7 @@ class movimientosResponse extends baseResponse {
 }
 
 @ObjectType()
-class entriesOfDate{
+class entriesOfDate {
   @Field(() => Int)
   entries: number
 
@@ -51,7 +52,7 @@ class entriesOfDate{
 
 @ObjectType()
 class entriesByDateResponse extends baseResponse {
-  @Field( type => [entriesOfDate], {nullable: true})
+  @Field(type => [entriesOfDate], { nullable: true })
   data?: entriesOfDate[]
 }
 
@@ -85,7 +86,7 @@ export class movimientoResolver {
   @Query(() => entriesByDateResponse)
   async entriesByDate(
     @Arg("sucursalId") sucursalId: string,
-    @Args() {skip, take}: PaginationArgs
+    @Args() { skip, take }: PaginationArgs
   ): Promise<entriesByDateResponse> {
     try {
       const moves = await Movimiento.moves(sucursalId, skip, take);
@@ -96,9 +97,31 @@ export class movimientoResolver {
     }
   }
 
-  // @Authorized()
-  // @isMySucursal()
-  // @query(() => )
+  @Authorized()
+  @isMySucursal()
+  @Query(() => movimientosResponse)
+  async moves(
+    @Arg("sucursalId") sucursalId: string,
+    @Arg("dia") dia: Date
+    ): Promise<movimientosResponse> {
+    try {
+      const existSucursal = await Sucursal.findOne(sucursalId);
+      if (!existSucursal) {
+        return newError("sucursal", "La sucursal no existe");
+      }
+      const inicioDia = new Date(dia)
+      inicioDia.setUTCHours(0,0,0,0)
+      const finDia = new Date(dia)
+      finDia.setUTCHours(23,59,59,999)
+      const moves = await Movimiento.find({ where: {
+         sucursal: existSucursal, 
+         createdAt: Between(inicioDia, finDia) }, order: { createdAt: "ASC" } });
+      return { data: moves };
+    } catch (error) {
+      console.log(error)
+      return newError("moves", "Algo fue mal")
+    }
+  }
 
   @Query(() => movimientoResponse)
   async lastMove(
@@ -162,19 +185,19 @@ export class movimientoResolver {
   }
 
   @Authorized(Role.Admin)
-  @Mutation(()=>Boolean)
-  async addMovimientosAlongPastMonth(@Args() {minClients, sucursalId, maxClients, timeShopOpen, timeShopClose}: addMovesPastMonthArgs): Promise<Boolean>{
+  @Mutation(() => Boolean)
+  async addMovimientosAlongPastMonth(@Args() { minClients, sucursalId, maxClients, timeShopOpen, timeShopClose }: addMovesPastMonthArgs): Promise<Boolean> {
     const existSucursal = await Sucursal.findOne(sucursalId)
-    if(!existSucursal) return false
-    
+    if (!existSucursal) return false
+
     const today = new Date()
 
-    const firstDay = new Date(today.getFullYear(),today.getMonth()-1, 1)
+    const firstDay = new Date(today.getFullYear(), today.getMonth() - 1, 1)
     let day = new Date(firstDay)
-    const lastDay = new Date(today.getFullYear(),today.getMonth(),0)
+    const lastDay = new Date(today.getFullYear(), today.getMonth(), 0)
 
     const input = []
-    while(day <= lastDay){
+    while (day <= lastDay) {
       const randClients = Math.trunc((Math.random() * (maxClients - minClients)) + minClients + 1)
 
       const startDay = new Date(day)
@@ -189,30 +212,30 @@ export class movimientoResolver {
 
       let actualClients = 0
       let actualMoment = new Date(startDay)
-      let totalMoves = randClients*2
-      for (let i = 1; i<=totalMoves; i++){
-        const waitForMove = Math.trunc((Math.random() * maxWaitForMove) + 1 )
+      let totalMoves = randClients * 2
+      for (let i = 1; i <= totalMoves; i++) {
+        const waitForMove = Math.trunc((Math.random() * maxWaitForMove) + 1)
         let typeMove;
         let movesLeft = totalMoves - i + 1
-        if(actualClients){
-          if(actualClients === existSucursal.capacidadMaxima || movesLeft === actualClients){
+        if (actualClients) {
+          if (actualClients === existSucursal.capacidadMaxima || movesLeft === actualClients) {
             typeMove = MovimientoEnum.Egreso
           } else {
-            Math.random()>0.5
-            ? typeMove = MovimientoEnum.Ingreso
-            : typeMove = MovimientoEnum.Egreso
+            Math.random() > 0.5
+              ? typeMove = MovimientoEnum.Ingreso
+              : typeMove = MovimientoEnum.Egreso
           }
         } else {
-          if(i == totalMoves){
+          if (i == totalMoves) {
             break;
           }
           typeMove = MovimientoEnum.Ingreso
         }
-        actualMoment.setMinutes(actualMoment.getMinutes()+waitForMove)
+        actualMoment.setMinutes(actualMoment.getMinutes() + waitForMove)
         actualClients += typeMove === MovimientoEnum.Ingreso
           ? 1
           : -1
-        
+
         input.push({
           createdAt: new Date(actualMoment),
           type: typeMove,
@@ -220,7 +243,7 @@ export class movimientoResolver {
           cantidadActual: actualClients,
         });
       }
-      day = new Date(day.getFullYear(), day.getMonth(), day.getDate()+1)
+      day = new Date(day.getFullYear(), day.getMonth(), day.getDate() + 1)
     }
     await Movimiento.insert(input)
     return true
