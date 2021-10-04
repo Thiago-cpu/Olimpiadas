@@ -1,6 +1,7 @@
 import { ArgsDictionary, createMethodDecorator } from "type-graphql";
 import { MyContext } from '../utils/context.interface';
 import { User } from '../entity/User';
+import { Role } from "../enums/role.enum";
 
 export function isMySucursal() {
     return createMethodDecorator(async ({ args: {sucursalId}, context }:{args: ArgsDictionary,context: MyContext}, next) => {
@@ -9,6 +10,9 @@ export function isMySucursal() {
             const user = await User.findOne(userId, {relations: ["sucursales"]})
             if(!user){
                 return new Error("Usuario no encontrado")
+            }
+            if(user.role === Role.Admin){
+                return next()
             }
             if(user.sucursales.some( sucursal => sucursal.id === sucursalId)){
                 return next();
