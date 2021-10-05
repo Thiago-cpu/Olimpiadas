@@ -42,7 +42,7 @@ const ENTRIES_BY_DATE = gql`
   }
 `;
 
-export default function ServerPaginationGrid({ sucursalId }) {
+export default function ServerPaginationGrid({ onDateClick, sucursalId }) {
   const { loading, data, fetchMore } = useQuery(ENTRIES_BY_DATE, {
     variables: {
       skip: 0,
@@ -60,6 +60,7 @@ export default function ServerPaginationGrid({ sucursalId }) {
       const allRows = data.entriesByDate.data
       if(allRows[(page+1)*5-1]){
         const newRows = allRows.slice(page*5, (page+1)*5)
+        onDateClick(newRows[0])
         setRows(newRows)
       } else {
         fetchMore({
@@ -72,7 +73,7 @@ export default function ServerPaginationGrid({ sucursalId }) {
   }, [page, data]);
 
   const handleRowClick = (e) => {
-    console.log(e.row.fecha)
+    onDateClick(e.row)
   }
 
   return (
