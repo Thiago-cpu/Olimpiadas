@@ -12,7 +12,9 @@ import {
 } from "@mui/material";
 import { Box } from "@mui/system";
 import {
-  LineChart,
+  AreaChart,
+  Area,
+  ReferenceLine,
   Line,
   CartesianGrid,
   XAxis,
@@ -23,20 +25,9 @@ import {
 import Link from "next/link";
 import { useContext } from "react";
 import userContext from "../../context/userContext";
-import { useSubscription, gql } from "@apollo/client";
+import { useSubscription, gql, useQuery } from "@apollo/client";
 import EntriesByDate from "../../components/entriesByDate";
 
-function createData(fecha, max) {
-  return { fecha, max };
-}
-
-const rows = [
-  createData("21 SEP", 43),
-  createData("20 SEP", 47),
-  createData("19 SEP", 34),
-  createData("18 SEP", 36),
-  createData("17 SEP", 40),
-];
 
 const SUBSCRIPTION = gql`
   subscription actualPeople($actualPeopleSucursalId: String!) {
@@ -48,17 +39,28 @@ const SUBSCRIPTION = gql`
 `;
 
 const MOVIMIENTOS = gql`
-  query moves($SucursalId: String!) {
-    moves(sucursalId: $SucursalId) {
+  query movesByDate($movesDia: DateTime!, $sucursalId: String!) {
+    moves(dia: $movesDia, sucursalId: $sucursalId) {
       data {
-        timestamp
-        cantidad
+        id
+        createdAt
+        cantidadActual
       }
     }
   }
 `;
 
-export default function Dashboard({ id, initialData }) {
+export default function DashBoard({ id, initialData }) {
+  const {data: moveData, refetch} = useQuery(MOVIMIENTOS,{
+    variables: {
+      sucursalId: id,
+      movesDia: new Date().toISOString()
+    },
+    notifyOnNetworkStatusChange: true
+  })
+  const [chartData, setChartData] = React.useState([])
+  const [dateSelected, setDateSelected] = React.useState()
+
   if (initialData.errors) {
     return <p>{initialData.errors[0].message}</p>;
   }
@@ -68,13 +70,43 @@ export default function Dashboard({ id, initialData }) {
 
   const { user } = useContext(userContext);
 
-  const data = [
-    { time: 1602450000000, clientes: 10 },
-    { time: 1602450300000, clientes: 11 },
-    { time: 1602452100000, clientes: 12 },
-    { time: 1602452160000, clientes: 11 },
-    { time: 1602452400000, clientes: 10 },
-  ];
+  
+  React.useEffect(()=>{
+    if(moveData && moveData.moves && moveData.moves.data){
+      setChartData(() => moveData.moves.data.map(move => {
+                          const newMove = {...move}
+                          newMove.createdAt = +new Date(move.createdAt)
+                          return newMove
+                        }))
+                        
+    }
+  },[moveData])
+
+  const onDateClick = (rowSelected) => {
+    const fecha = rowSelected.fecha
+    setDateSelected(new Intl.DateTimeFormat('es-AR', {dateStyle: "long"}).format(new Date(fecha)))
+    refetch({sucursalId: id, movesDia: fecha})
+  }
+  const offset = () => {
+    let maxClient = 0
+    if(!chartData.length) return maxClient
+
+    chartData.forEach(move => {
+      if(move.cantidadActual > maxClient) maxClient = move.cantidadActual
+    })
+    return (maxClient-capacidadMaxima)/maxClient
+
+  }
+
+  const cantActual = subData
+  ? subData.actualPeople.cant
+  : initialData.data.cantidadActual
+
+  const capacidadMaxima = subData
+  ? subData.actualPeople.maxCant
+  : initialData.data.sucursal.capacidadMaxima
+
+  const off = offset()
 
   return (
     <Box
@@ -94,7 +126,7 @@ export default function Dashboard({ id, initialData }) {
         </Typography>
       </Box>
 
-      <EntriesByDate sucursalId={id}/>
+      <EntriesByDate onDateClick={onDateClick} sucursalId={id}/>
 
       <Card sx={{ flexBasis: "16rem", flexGrow: 1, height: "fit-content" }}>
         <CardHeader
@@ -123,9 +155,7 @@ export default function Dashboard({ id, initialData }) {
                   variant="subtitle2"
                   sx={{ color: "text.secondary" }}
                 >
-                  {subData
-                    ? subData.actualPeople.cant
-                    : initialData.data.cantidadActual}
+                  {cantActual}
                 </Typography>
               </Box>
             </ListItem>
@@ -142,9 +172,7 @@ export default function Dashboard({ id, initialData }) {
                   variant="subtitle2"
                   sx={{ color: "text.secondary" }}
                 >
-                  {subData
-                    ? subData.actualPeople.maxCant
-                    : initialData.data.sucursal.capacidadMaxima}
+                  {capacidadMaxima}
                 </Typography>
               </Box>
             </ListItem>
@@ -160,19 +188,32 @@ export default function Dashboard({ id, initialData }) {
       </Card>
 
       <Card sx={{ flexBasis: "100%", flexGrow: 1 }}>
-        <CardContent>
+        <CardContent sx={{textAlign: "center"}}>
+          {!chartData.length?"loading..."
+          :
+          <>
+          <Typography variant="h7">{dateSelected}</Typography>
           <ResponsiveContainer width="100%" height={300}>
-            <LineChart
-              data={data}
+            <AreaChart
+              data={chartData}
               margin={{ top: 5, right: 5, bottom: 5, left: 0 }}
             >
-              <Line type="monotone" label={3} dataKey="clientes" stroke="#8884d8" />
               <CartesianGrid stroke="#ccc" strokeDasharray="5 5" />
-              <XAxis dataKey="time" name="Tiempo" scale='time' tickFormatter={timestamp => new Intl.DateTimeFormat('es-AR', {hour: "2-digit", minute: "2-digit"}).format(new Date(timestamp))}/>
-              <YAxis dataKey="clientes" name="Clientes"/>
-              <Tooltip formatter={timestamp => new Intl.DateTimeFormat('es-AR', {hour: "2-digit", minute: "2-digit"}).format(new Date(timestamp))} />
-            </LineChart>
+              <XAxis dataKey="createdAt" name="Tiempo" scale='time' type='number' domain={[chartData[0].createdAt, chartData[chartData.length-1].createdAt]} tickFormatter={timestamp => new Intl.DateTimeFormat('es-AR', {hour: "2-digit", minute: "2-digit"}).format(new Date(timestamp))}/>
+              <YAxis dataKey="cantidadActual" scale='linear' name="Clientes"/>
+              <Tooltip labelFormatter={timestamp => new Intl.DateTimeFormat('es-AR', {hour: "2-digit", minute: "2-digit"}).format(new Date(timestamp))} />
+              <ReferenceLine y={capacidadMaxima} label="Max" stroke="red" strokeDasharray="3 3" />
+              <defs>
+                <linearGradient id="splitColor" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset={off} stopColor="rgb(216 132 132)" stopOpacity={1} />
+                  <stop offset={off} stopColor="#8884d8" stopOpacity={1} />
+                </linearGradient>
+              </defs>
+              <Area type="monotone" dataKey="cantidadActual" stroke="url(#splitColor)" fill="url(#splitColor)" />
+            </AreaChart>
           </ResponsiveContainer>
+          </>
+          }
         </CardContent>
       </Card>
     </Box>

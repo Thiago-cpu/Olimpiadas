@@ -59,6 +59,9 @@ function createApolloClient() {
                   newObject.data = [...newObject.data, ...incoming.data]
                   return newObject;
                 }
+            },
+            moves:{
+              keyArgs: ["sucursalId"]
             }
           }
         }
