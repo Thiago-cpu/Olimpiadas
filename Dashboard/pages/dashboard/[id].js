@@ -25,7 +25,7 @@ import {
 import Link from "next/link";
 import { useContext } from "react";
 import userContext from "../../context/userContext";
-import { useSubscription, gql, useQuery } from "@apollo/client";
+import { useSubscription, gql, useQuery, useLazyQuery } from "@apollo/client";
 import EntriesByDate from "../../components/entriesByDate";
 
 
@@ -51,13 +51,7 @@ const MOVIMIENTOS = gql`
 `;
 
 export default function DashBoard({ id, initialData }) {
-  const {data: moveData, refetch} = useQuery(MOVIMIENTOS,{
-    variables: {
-      sucursalId: id,
-      movesDia: new Date().toISOString()
-    },
-    notifyOnNetworkStatusChange: true
-  })
+  const [getMoves, {called,data: moveData, refetch}] = useLazyQuery(MOVIMIENTOS)
   const [chartData, setChartData] = React.useState([])
   const [dateSelected, setDateSelected] = React.useState()
 
@@ -85,7 +79,11 @@ export default function DashBoard({ id, initialData }) {
   const onDateClick = (rowSelected) => {
     const fecha = rowSelected.fecha
     setDateSelected(new Intl.DateTimeFormat('es-AR', {dateStyle: "long"}).format(new Date(fecha)))
-    refetch({sucursalId: id, movesDia: fecha})
+    if(!called){
+      getMoves({variables: {sucursalId: id, movesDia: fecha}})
+    }else {
+      refetch({sucursalId: id, movesDia: fecha})
+    }
   }
   const offset = () => {
     let maxClient = 0
