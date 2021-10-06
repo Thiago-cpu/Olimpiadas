@@ -9,6 +9,7 @@ import {
   List,
   ListItem,
   Typography,
+  CircularProgress
 } from "@mui/material";
 import { Box } from "@mui/system";
 import {
@@ -27,6 +28,7 @@ import { useContext } from "react";
 import userContext from "../../context/userContext";
 import { useSubscription, gql, useQuery, useLazyQuery } from "@apollo/client";
 import EntriesByDate from "../../components/entriesByDate";
+import {useRouter} from "next/router";
 
 
 const SUBSCRIPTION = gql`
@@ -34,6 +36,20 @@ const SUBSCRIPTION = gql`
     actualPeople(sucursalId: $actualPeopleSucursalId) {
       cant
       maxCant
+    }
+  }
+`;
+const GET_MY_SUCURSALES = gql`
+  query MySucursals {
+    me {
+      data {
+        sucursales {
+          id
+          name
+          capacidadMaxima
+          localizacion
+        }
+      }
     }
   }
 `;
@@ -51,10 +67,16 @@ const MOVIMIENTOS = gql`
 `;
 
 export default function DashBoard({ id, initialData }) {
-  const [getMoves, {called,data: moveData, refetch}] = useLazyQuery(MOVIMIENTOS)
+  const router = useRouter();
+  const [getMoves, {called,data: moveData, loading,  refetch}] = useLazyQuery(MOVIMIENTOS)
+  const {data: sucursalesData, loading: sucursalesLoading, error: sucursalesError} = useQuery(GET_MY_SUCURSALES)
   const [chartData, setChartData] = React.useState([])
   const [dateSelected, setDateSelected] = React.useState()
 
+  if(sucursalesError) {
+    router.push("/")
+  }
+  const sucursalName = sucursalesData?.me?.data?.sucursales.find(sucursal => sucursal.id === id)?.name
   if (initialData.errors) {
     return <p>{initialData.errors[0].message}</p>;
   }
@@ -106,6 +128,7 @@ export default function DashBoard({ id, initialData }) {
 
   const off = offset()
 
+  if(sucursalesLoading) return <CircularProgress />
   return (
     <Box
       sx={{
@@ -120,7 +143,7 @@ export default function DashBoard({ id, initialData }) {
       <Box sx={{ flexBasis: "100%" }}>
         <Typography variant="h5">Hola, {user.name}</Typography>
         <Typography variant="h6" sx={{ color: "text.secondary" }}>
-          Aquí esta la información de tu local
+          Aquí esta la información de {sucursalName}
         </Typography>
       </Box>
 
@@ -187,9 +210,11 @@ export default function DashBoard({ id, initialData }) {
 
       <Card sx={{ flexBasis: "100%", flexGrow: 1 }}>
         <CardContent sx={{textAlign: "center"}}>
-          {!chartData.length?"loading..."
-          :
-          <>
+          {loading 
+          ? <CircularProgress />
+          : !chartData.length 
+           ? <Typography variant="h6">No hay datos para mostrar</Typography>
+           : <>
           <Typography variant="h7">{dateSelected}</Typography>
           <ResponsiveContainer width="100%" height={300}>
             <AreaChart
@@ -197,7 +222,7 @@ export default function DashBoard({ id, initialData }) {
               margin={{ top: 5, right: 5, bottom: 5, left: 0 }}
             >
               <CartesianGrid stroke="#ccc" strokeDasharray="5 5" />
-              <XAxis dataKey="createdAt" name="Tiempo" scale='time' type='number' domain={[chartData[0].createdAt, chartData[chartData.length-1].createdAt]} tickFormatter={timestamp => new Intl.DateTimeFormat('es-AR', {hour: "2-digit", minute: "2-digit"}).format(new Date(timestamp))}/>
+              <XAxis dataKey="createdAt" name="Tiempo" scale='time' type='number' domain={[chartData[0]?.createdAt, chartData[chartData.length-1]?.createdAt]} tickFormatter={timestamp => new Intl.DateTimeFormat('es-AR', {hour: "2-digit", minute: "2-digit"}).format(new Date(timestamp))}/>
               <YAxis dataKey="cantidadActual" scale='linear' name="Clientes"/>
               <Tooltip labelFormatter={timestamp => new Intl.DateTimeFormat('es-AR', {hour: "2-digit", minute: "2-digit"}).format(new Date(timestamp))} />
               <ReferenceLine y={capacidadMaxima} label="Max" stroke="red" strokeDasharray="3 3" />
