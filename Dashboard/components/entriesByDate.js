@@ -80,7 +80,7 @@ export default function ServerPaginationGrid({ onDateClick, sucursalId }) {
     <Paper style={{ padding: "1em", flexBasis: "25rem", flexGrow: 3 }}>
       <Typography variant="h6">Datos históricos</Typography>
       <div style={{ width: "100%" }}>
-        {rows.length > 0 ? (
+        {loading || rows.length > 0 ? (
         <DataGrid
           disableColumnFilter
           disableColumnMenu
