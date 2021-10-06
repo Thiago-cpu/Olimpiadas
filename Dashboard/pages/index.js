@@ -1,5 +1,4 @@
-import { initializeApollo, addApolloState } from '../lib/apolloClient'
-import { Card, CardContent, CardMedia, Typography, Button, CardActions, Grid, Box} from '@mui/material'
+import { Card, CardContent, CircularProgress, Typography, Button, CardActions, Grid, Box} from '@mui/material'
 import Link from 'next/link'
 import { useQuery, gql } from '@apollo/client'
 
@@ -24,6 +23,9 @@ query Sucursales {
 
 const IndexPage = () => {
   const { loading, error, data } = useQuery(SUCURSALES)
+
+  if(loading) return <Box container align="center"><CircularProgress /></Box>
+  if(error) return <Typography align="center">Error</Typography>
   return (
  <Box>
    <Grid  container spacing={2}>
