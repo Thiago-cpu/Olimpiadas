@@ -5,8 +5,6 @@ import {
   Box,
   CircularProgress,
   Container,
-  Fab,
-  FormControl,
   Input,
   InputLabel,
   MenuItem,
@@ -20,22 +18,15 @@ import {
   TextField,
   Tooltip,
 } from "@mui/material";
-import Link from "next/link";
-import EditIcon from "@mui/icons-material/Edit";
-import DoneAllIcon from "@mui/icons-material/DoneAll";
-import StorefrontIcon from "@mui/icons-material/Storefront";
 import { gql, useQuery, useMutation } from "@apollo/client";
 import Search from "../components/Search";
-import NewSensor from "../components/NewSensor.modal";
-import { useFormik } from "formik";
-import * as Yup from "yup";
-import AlertContext from "../context/alertContext";
 import CreateRow from "../components/rowUpdateSucursal";
 
 const GET_MY_SUCURSALES = gql`
   query MySucursals {
     me {
       data {
+        id
         sucursales {
           id
           name

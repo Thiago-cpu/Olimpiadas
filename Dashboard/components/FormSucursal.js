@@ -14,8 +14,13 @@ const ADD_SUCURSAL = gql`
   mutation AddSucursalMutation($addSucursalData: sucursalInput!) {
     addSucursal(data: $addSucursalData) {
       data {
+        id
+        name
+        capacidadMaxima
+        localizacion
         encargado {
           id
+          name
         }
       }
       errors{
@@ -27,7 +32,24 @@ const ADD_SUCURSAL = gql`
 `;
 export default function FormSucursal({idSucursal, handleClose }) {
   const {setAlert} = useContext(AlertContext)
-  const [addSucursal] = useMutation(ADD_SUCURSAL);
+  const [addSucursal] = useMutation(ADD_SUCURSAL,{
+    update(cache, {data}) {
+      cache.modify({
+        fields: {
+          sucursales(existingSucursales) {
+            if(data.addSucursal.data){
+              return [...existingSucursales.data, data.addSucursal.data]
+            }
+          },
+          me(me){
+            if(data.addSucursal.data && data.addSucursal.data.encargado.id === me.data.id){
+              return [...me.data.sucursales, data.addSucursal.data]
+            }
+          }
+        }
+      });
+    }
+  });
   const {
     handleSubmit,
     handleBlur,
