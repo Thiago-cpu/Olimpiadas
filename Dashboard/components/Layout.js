@@ -96,7 +96,7 @@ export default function Layout({children}) {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" noWrap component="div">
-            Olimpis
+            Olimpgreso
           </Typography>
         </Toolbar>
       </AppBar>
@@ -126,38 +126,32 @@ export default function Layout({children}) {
         </DrawerHeader>
         <Divider />
         <List>
-          <Link href="/" passHref={true}>
-            <DrawerLink>
-              <ListItem button onClick={handleDrawerClose}>
+          <Link href="/" passHref>
+              <ListItem button onClick={handleDrawerClose} component="a">
                   <ListItemIcon>
                     <StorefrontIcon />
                   </ListItemIcon>
                   <ListItemText primary={"Sucursales"} />
               </ListItem>
-            </DrawerLink>
           </Link>
           {user.isLogged &&
           <>
-          <Link href="/misSucursales" passHref={true}>
-            <DrawerLink>
-              <ListItem button onClick={handleDrawerClose}>
-                  <ListItemIcon>
-                    <StorefrontIcon />
-                  </ListItemIcon>
-                  <ListItemText primary={"Mis Sucursales"} />
-              </ListItem>
-            </DrawerLink>
-          </Link>
-          {user.role === "Admin" &&
-          <Link href="/users">
-            <DrawerLink>
-              <ListItem button onClick={handleDrawerClose}>
+          <Link href="/misSucursales" passHref >
+            <ListItem button component="a" onClick={handleDrawerClose}>
                 <ListItemIcon>
-                  <PeopleIcon />
+                  <StorefrontIcon />
                 </ListItemIcon>
-                <ListItemText primary={"Usuarios"} />
-              </ListItem>
-            </DrawerLink>
+                <ListItemText primary={"Mis Sucursales"} />
+            </ListItem>
+          </Link> 
+          {user.role === "Admin" &&
+          <Link href="/users" passHref >
+            <ListItem button component="a" onClick={handleDrawerClose}>
+              <ListItemIcon>
+                <PeopleIcon />
+              </ListItemIcon>
+              <ListItemText primary={"Usuarios"} />
+            </ListItem>
           </Link>
           
           }
@@ -171,29 +165,25 @@ export default function Layout({children}) {
             <ListItemIcon>
               <LogoutIcon />
             </ListItemIcon>
-            <ListItemText primary={"Logout"} />
+            <ListItemText primary={"Cerrar Sesión"} />
           </ListItem>
           :
           <>
-          <Link href="/login" passHref={true}>
-            <DrawerLink>
-              <ListItem button onClick={handleDrawerClose}>
-                <ListItemIcon>
-                  <LoginIcon />
-                </ListItemIcon>
-                <ListItemText primary={"Login"} />
-              </ListItem>
-            </DrawerLink>
+          <Link href="/login"  passHref={true}>
+            <ListItem component="a" button onClick={handleDrawerClose}>
+              <ListItemIcon>
+                <LoginIcon />
+              </ListItemIcon>
+              <ListItemText primary={"Iniciar Sesión"} />
+            </ListItem>
           </Link>
           <Link href="/register" passHref={true}>
-            <DrawerLink>
-              <ListItem button onClick={handleDrawerClose}>
-                <ListItemIcon>
-                  <VpnKeyIcon />
-                </ListItemIcon>
-                <ListItemText primary={"Register"} />
-              </ListItem>
-            </DrawerLink>
+            <ListItem component="a" button onClick={handleDrawerClose}>
+              <ListItemIcon>
+                <VpnKeyIcon />
+              </ListItemIcon>
+              <ListItemText primary={"Registrarse"} />
+            </ListItem>
           </Link>
           </>
 
@@ -203,7 +193,8 @@ export default function Layout({children}) {
       </Drawer>
       <Main sx={{
         position:"absolute",
-        width:"100%"
+        width:"100%",
+        minHeight:"100%",
       }} open={open}>
         <DrawerHeader />
         {children}
