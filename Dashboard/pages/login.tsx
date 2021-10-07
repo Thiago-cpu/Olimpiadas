@@ -172,35 +172,37 @@ export default function Login() {
           </FormHelperText>
         </FormControl>
 
-        <div
-          style={{
-            margin: "0.5em 0",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-          }}
+        <Box sx={{
+          display: 'flex', 
+          flexDirection: 'row',
+          flexWrap: 'wrap',
+          marginTop: '0.5em',
+          gap: '0.5em',
+          alignItems: 'center',
+          justifyContent: 'space-evenly',
+          width: '100%',
+          }}>
+        <LoadingButton
+          type="submit"
+          loading={isSubmitting}
+          disabled={isSubmitting}
+          variant="contained"
+          sx={{ height: "42px", flex: '1'}}
         >
-          <LoadingButton
-            type="submit"
-            variant="contained"
-            sx={{ width: "155px", height: "42px" }}
-            loading={isSubmitting}
-            disabled={isSubmitting}
-          >
-            Confirmar
-          </LoadingButton>
-        </div>
-        <NextLink href="/register">
-          <Link>
-            <LoadingButton
-              disabled={isSubmitting}
-              variant="outlined"
-              sx={{ width: "155px", height: "42px" }}
-            >
-              Registrate
-            </LoadingButton>
-          </Link>
-        </NextLink>
+          Confirmar
+        </LoadingButton>
+        
+          <NextLink href="/register" passHref>
+              <LoadingButton
+                component="a"
+                variant="outlined"
+                sx={{  height: "42px", flex: '1' }}
+                disabled={isSubmitting}
+              >
+                Registrate
+              </LoadingButton>
+          </NextLink>
+        </Box>
       </Container>
     </Box>
   );
