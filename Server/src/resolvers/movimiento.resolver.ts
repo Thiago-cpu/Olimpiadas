@@ -105,9 +105,13 @@ export class movimientoResolver {
       inicioDia.setUTCHours(0,0,0,0)
       const finDia = new Date(dia)
       finDia.setUTCHours(23,59,59,999)
-      const moves = await Movimiento.find({ where: {
+      const moves = await Movimiento.find({
+        where: {
          sucursal: existSucursal, 
-         createdAt: Between(inicioDia, finDia) }, order: { createdAt: "ASC" } });
+         createdAt: Between(inicioDia.toISOString(), finDia.toISOString()) 
+        }, 
+        order: { createdAt: "ASC" }
+      });
       return { data: moves };
     } catch (error) {
       console.log(error)
