@@ -1,6 +1,9 @@
 import { Card, CardContent, CircularProgress, Typography, Button, CardActions, Grid, Box} from '@mui/material'
 import Link from 'next/link'
 import { useQuery, gql } from '@apollo/client'
+import Settings from '../components/settings'
+import { useContext } from 'react'
+import UserContext from "../context/userContext";
 
 const SUCURSALES = gql`
 query Sucursales {
@@ -23,9 +26,29 @@ query Sucursales {
 
 const IndexPage = () => {
   const { loading, error, data } = useQuery(SUCURSALES)
+  const {user} = useContext(UserContext)
 
   if(loading) return <Box container align="center"><CircularProgress /></Box>
   if(error) return <Typography align="center">Error</Typography>
+
+  const renderSettings = (encargadoName, sucursalName, sucursalId) => {
+    if(encargadoName === user.name || user.role === 'Admin'){
+      return(
+        <Settings 
+        sx={{
+          position: "absolute",
+          top: "0.3em",
+          right: "0.3em"
+        }} 
+        sucursal = {{
+          name: sucursalName,
+          id: sucursalId
+        }}/>
+        )
+    }
+    return null
+  }
+
   return (
  <Box>
    <Grid  container spacing={2}>
@@ -41,10 +64,15 @@ const IndexPage = () => {
       }) => (
         <Grid item xs={12} sm={6} md={4} lg={3} key={id}>
           <Card >
-            <CardContent>
+            <CardContent sx={{
+              position: "relative"
+            }}>
               <Typography gutterBottom variant="h5" component="div">
                 {name}
               </Typography>
+              
+              {renderSettings(encargadoName, name, id)}
+
               <Typography variant="body2" color="text.secondary">
                 Capacidad máxima: {capacidadMaxima} <br/>
                 Localización: {localizacion} <br/>

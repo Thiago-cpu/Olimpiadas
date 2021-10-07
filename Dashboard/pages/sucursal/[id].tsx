@@ -1,4 +1,4 @@
-import { Tooltip, Button, Box } from "@mui/material";
+import { Tooltip, Button, Box, IconButton } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { gql, useSubscription } from "@apollo/client";
@@ -52,14 +52,14 @@ export default function Ingreso({ id, initialData }) {
 
         <Link href="/">
           <Tooltip color="primary" arrow title="Volver" placement="left">
-            <Button variant="text" sx={{
+            <IconButton sx={{
               position: "absolute",
               top:"1em",
               left:"1em",
               color:"black"
               }}>
               <ArrowBackIcon />
-            </Button>
+            </IconButton>
           </Tooltip>
         </Link>
 
