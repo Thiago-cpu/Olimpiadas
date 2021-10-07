@@ -8,8 +8,10 @@ import Link from 'next/link'
 const SUBSCRIPTION = gql`
   subscription actualPeople($actualPeopleSucursalId: String!) {
     actualPeople(sucursalId: $actualPeopleSucursalId) {
-      cant
-      maxCant
+      cantidadActual
+      sucursal {
+        capacidadMaxima
+      }
     }
   }
 `;
@@ -26,8 +28,8 @@ export default function Ingreso({ id, initialData }) {
     cantidadDePersonas = initialData.data.cantidadActual;
     maximaCantidadDePersonas = initialData.data.sucursal.capacidadMaxima;
   } else {
-    cantidadDePersonas = data.actualPeople.cant;
-    maximaCantidadDePersonas = data.actualPeople.maxCant;
+    cantidadDePersonas = data.actualPeople.cantidadActual;
+    maximaCantidadDePersonas = data.actualPeople.sucursal.capacidadMaxima;
   }
 
   const puedeIngresar = cantidadDePersonas < maximaCantidadDePersonas;

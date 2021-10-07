@@ -32,7 +32,7 @@ const ENTRIES_BY_DATE = gql`
       take: $limit
       sucursalId: $sucursalId
       skip: $skip
-    ) @connection(key: "feed", filter: ["sucursalId"]) {
+    ){
       data {
         id
         entries

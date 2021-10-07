@@ -15,6 +15,7 @@ import {
   Int,
   Query,
   Args,
+  ArgsDictionary,
 } from "type-graphql";
 import { Between } from "typeorm";
 import { baseResponse } from "../baseTypes/baseResponse.response";
@@ -59,29 +60,17 @@ class entriesByDateResponse extends baseResponse {
   data?: entriesOfDate[]
 }
 
-@ObjectType()
-export class Notification {
-  @Field(() => Int, { nullable: true })
-  cant?: number;
-
-  @Field(() => Int, { nullable: true })
-  maxCant?: number;
-
-  @Field((type) => Date)
-  date: Date;
-}
-
 @Resolver((of) => Movimiento)
 export class movimientoResolver {
   @Subscription({
     topics: "MOVIMIENTO",
-    filter: ({ payload, args }) => payload.sucursalId === args.sucursalId,
+    filter: ({ payload, args }:{payload: Movimiento, args: ArgsDictionary}) => payload.sucursal.id === args.sucursalId,
   })
   actualPeople(
-    @Root() message: any,
+    @Root() move: Movimiento,
     @Arg("sucursalId") sucursalId: string
-  ): Notification {
-    return { cant: message.cant, maxCant: message.maxCant, date: new Date() };
+  ): Movimiento {
+    return move;
   }
 
   @Authorized()
@@ -176,11 +165,7 @@ export class movimientoResolver {
         cantidadActual,
       }).save();
       const maxCant = existSensor.sucursal.capacidadMaxima;
-      await pubSub.publish("MOVIMIENTO", {
-        cant: cantidadActual,
-        sucursalId: existSensor.sucursal.id,
-        maxCant,
-      });
+      await pubSub.publish("MOVIMIENTO", result);
       return { data: result };
     } catch (err) {
       return newError("Error", "Ha ocurrido un error al añadir el movimiento");

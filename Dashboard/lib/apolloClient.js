@@ -61,7 +61,22 @@ function createApolloClient() {
                 }
             },
             moves:{
-              keyArgs: ["sucursalId"]
+              keyArgs: ["sucursalId"],
+              merge(existing = {data: []}, incoming, {readField}) {
+                const newObject = {...existing}
+                if(!existing.data[0]){
+                  newObject.data = [...newObject.data, ...incoming.data]
+                } else {
+                  const existingDate = new Date(readField("createdAt", existing.data[0]))
+                  const incomingDate = new Date(readField("createdAt", incoming.data[0]))
+                  existingDate.setHours(0,0,0,0)
+                  incomingDate.setHours(0,0,0,0)
+                  if(+existingDate === +incomingDate){
+                    newObject.data = [...newObject.data, ...incoming.data]
+                  }
+                }
+                return newObject;
+              }
             }
           }
         }

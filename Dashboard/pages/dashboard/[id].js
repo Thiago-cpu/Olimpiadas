@@ -34,8 +34,13 @@ import {useRouter} from "next/router";
 const SUBSCRIPTION = gql`
   subscription actualPeople($actualPeopleSucursalId: String!) {
     actualPeople(sucursalId: $actualPeopleSucursalId) {
-      cant
-      maxCant
+      id
+      createdAt
+      cantidadActual
+      sucursal {
+        id
+        capacidadMaxima
+      }
     }
   }
 `;
@@ -82,6 +87,29 @@ export default function DashBoard({ id, initialData }) {
   }
   const { data: subData } = useSubscription(SUBSCRIPTION, {
     variables: { actualPeopleSucursalId: id },
+    onSubscriptionData: ({client, subscriptionData}) => {
+      const move = subscriptionData.data.actualPeople
+
+      const newMove = {
+        __typename: 'Movimiento',
+        id: move.id,
+        cantidadActual: move.cantidadActual,
+        createdAt: move.createdAt,
+      }
+      
+      client.writeQuery({
+        query: MOVIMIENTOS,
+        variables: {
+          movesDia: move.createdAt,
+          sucursalId: move.sucursal.id
+        },
+        data:{
+          moves: {
+            data: [newMove]
+          }
+        }
+      })
+    }
   });
 
   const { user } = useContext(userContext);
@@ -119,11 +147,11 @@ export default function DashBoard({ id, initialData }) {
   }
 
   const cantActual = subData
-  ? subData.actualPeople.cant
+  ? subData.actualPeople.cantidadActual
   : initialData.data.cantidadActual
 
   const capacidadMaxima = subData
-  ? subData.actualPeople.maxCant
+  ? subData.actualPeople.sucursal.capacidadMaxima
   : initialData.data.sucursal.capacidadMaxima
 
   const off = offset()
