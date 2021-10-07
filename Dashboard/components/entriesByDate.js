@@ -58,7 +58,7 @@ export default function ServerPaginationGrid({ onDateClick, sucursalId }) {
   React.useEffect(async () => {
     if(!loading && data){
       const allRows = data.entriesByDate.data
-      if(allRows[(page+1)*5-1]){
+      if(allRows[page*5]){
         const newRows = allRows.slice(page*5, (page+1)*5)
         onDateClick(newRows[0])
         setRows(newRows)
@@ -75,7 +75,6 @@ export default function ServerPaginationGrid({ onDateClick, sucursalId }) {
   const handleRowClick = (e) => {
     onDateClick(e.row)
   }
-
   return (
     <Paper style={{ padding: "1em", flexBasis: "25rem", flexGrow: 3 }}>
       <Typography variant="h6">Datos históricos</Typography>
