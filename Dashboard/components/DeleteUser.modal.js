@@ -10,7 +10,6 @@ import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import { gql, useMutation } from '@apollo/client';
 import AlertContext from '../context/alertContext';
-import { initializeApollo } from '../lib/apolloClient';
 import {GET_USERS} from '../pages/users'
 
 const REMOVE_USER = gql`
