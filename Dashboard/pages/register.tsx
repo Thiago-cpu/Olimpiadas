@@ -20,6 +20,7 @@ import { gql, useMutation } from "@apollo/client";
 import Router from "next/router";
 import AlertContext from "../context/alertContext";
 import NextLink from "next/link";
+import Head from "next/head";
 
 const REGISTER = gql`
   mutation Register($registerData: userInput!) {
@@ -38,6 +39,7 @@ const REGISTER = gql`
 export default function Register() {
   const { setAlert } = useContext(AlertContext);
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [register] = useMutation(REGISTER);
 
   const {
@@ -52,15 +54,21 @@ export default function Register() {
     initialValues: {
       name: "",
       password: "",
+      passwordConfirm: "",
     },
     validationSchema: Yup.object({
       name: Yup.string()
         .required("Requerido")
         .min(3, "Mínimo 3 caracteres")
-        .max(15, "Máximo 15 caracteres"),
+        .max(20, "Máximo 20 caracteres"),
       password: Yup.string()
         .required("Requerido")
-        .max(12, "máximo 12 caracteres"),
+        .max(12, "Máximo 12 caracteres")
+        .oneOf([Yup.ref("passwordConfirm"), null], "Las contraseñas no coinciden"),
+      passwordConfirm: Yup.string()
+        .required("Requerido")
+        .max(12, "Máximo 12 caracteres")
+        .oneOf([Yup.ref("password"), null], "Las contraseñas no coinciden"),
     }),
     onSubmit: async (values) => {
       try {
@@ -104,6 +112,9 @@ export default function Register() {
       sx={{ width: "100%", maxWidth: 500, marginTop: "3em" }}
       m={"auto"}
     >
+      <Head>
+        <title>Registro</title>
+      </Head>
       <Typography align={"center"} variant="h3" mb="1em" component="div">
         Registrate
       </Typography>
@@ -139,7 +150,7 @@ export default function Register() {
             endAdornment={
               <InputAdornment position="end">
                 <IconButton
-                  aria-label="toggle password visibility"
+                  aria-label="Toggle password visibility"
                   name="showPassword"
                   onClick={handleClickShowPassword}
                   onMouseDown={handleMouseDownPassword}
@@ -154,36 +165,66 @@ export default function Register() {
             {touched.password && errors.password}
           </FormHelperText>
         </FormControl>
-
+        
+        <FormControl fullWidth variant="filled" margin="normal">
+          <InputLabel htmlFor="passwordConfirm">Confirmar contraseña</InputLabel>
+          <FilledInput
+            type={showConfirmPassword ? "text" : "password"}
+            name="passwordConfirm"
+            id="passwordConfirm"
+            value={values.passwordConfirm}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            disabled={isSubmitting}
+            error={touched.passwordConfirm && Boolean(errors.passwordConfirm)}
+            endAdornment={
+              <InputAdornment position="end">
+                <IconButton
+                  aria-label="Toggle password visibility"
+                  name="showPassword"
+                  onClick={()=>setShowConfirmPassword(prevState => !prevState)}
+                  onMouseDown={handleMouseDownPassword}
+                  edge="end"
+                >
+                  {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </InputAdornment>
+            }
+          />
+          <FormHelperText id="passwordConfirm">
+            {touched.passwordConfirm && errors.passwordConfirm}
+          </FormHelperText>
+        </FormControl>
+        <Box sx={{
+          display: 'flex', 
+          flexDirection: 'row',
+          flexWrap: 'wrap',
+          marginTop: '0.5em',
+          gap: '0.5em',
+          alignItems: 'center',
+          justifyContent: 'space-evenly',
+          width: '100%',
+          }}>
         <LoadingButton
           type="submit"
           loading={isSubmitting}
           disabled={isSubmitting}
           variant="contained"
-          sx={{ width: "155px", height: "42px" }}
+          sx={{ height: "42px", flex: '1'}}
         >
           Confirmar
         </LoadingButton>
-        <div
-          style={{
-            margin: "0.5em 0",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-          }}
-        >
-          <NextLink href="/login">
-            <Link>
+          <NextLink href="/login" passHref>
               <LoadingButton
+                component="a"
                 variant="outlined"
-                sx={{ width: "155px", height: "42px" }}
+                sx={{  height: "42px", flex: '1' }}
                 disabled={isSubmitting}
               >
                 Iniciar Sesión
               </LoadingButton>
-            </Link>
           </NextLink>
-        </div>
+        </Box>
       </Container>
     </Box>
   );
