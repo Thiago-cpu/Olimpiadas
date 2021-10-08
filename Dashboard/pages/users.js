@@ -18,12 +18,12 @@ import {
   Select
 } from '@mui/material'
 import { deepOrange, deepPurple } from '@mui/material/colors';
-import USure from '../components/DeleteUser.modal';
 import { gql, useQuery, useMutation } from '@apollo/client';
 import NewSucursal from '../components/NewSucursal.modal';
 import Search from '../components/Search';
 import AlertContext from '../context/alertContext';
 import { initializeApollo } from '../lib/apolloClient';
+import DeleteUser from '../components/DeleteUser';
 
 const CHANGE_ROLE = gql`
   mutation ChangeRoleMutation($changeRoleData: changeRoleInput!) {
@@ -130,7 +130,7 @@ export default function UsersTable() {
               sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
             >
               <TableCell sx={{width: 50}} align="center" component="th" scope="row">
-                <USure onClick={removeRow} user={row} />
+                <DeleteUser onClick={removeRow} user={row} />
               </TableCell>
               <TableCell sx={{width: 50}} align="center">
                 {i+1}
