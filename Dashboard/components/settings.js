@@ -36,10 +36,21 @@ export default function Settings({ sx = {}, sucursal }) {
       cache.modify({
         fields: {
           sucursales(existingSucursales, {readField}) {
-            return existingSucursales.data.filter((existSucursal) => readField("id", existSucursal) !== sucursal.id);
+            const incomingSucursales = {...existingSucursales}
+            incomingSucursales.data = existingSucursales.data.filter((existSucursal) => readField("id", existSucursal) !== sucursal.id);
+            return incomingSucursales
           }
         }
       });
+
+      cache.modify({
+        id: cache.identify(sucursal.encargado),
+        fields: {
+          sucursales(existingSucursales, {readField}){
+            return existingSucursales.filter(existSucursal => readField("id",existSucursal) !== sucursal.id)
+          }
+        }
+      })
     }
   })
   const settingsRef = useRef(null);
