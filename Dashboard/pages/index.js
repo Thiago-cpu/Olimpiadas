@@ -18,6 +18,7 @@ query Sucursales {
       capacidadMaxima
       localizacion
       encargado {
+        id
         name
       }
     }
@@ -31,8 +32,8 @@ const IndexPage = () => {
   if(loading) return <Box container align="center"><CircularProgress /></Box>
   if(error) return <Typography align="center">Error</Typography>
 
-  const renderSettings = (encargadoName, sucursalName, sucursalId) => {
-    if(encargadoName === user.name || user.role === 'Admin'){
+  const renderSettings = (sucursal) => {
+    if(sucursal.name === user.name || user.role === 'Admin'){
       return(
         <Settings 
         sx={{
@@ -40,10 +41,7 @@ const IndexPage = () => {
           top: "0.3em",
           right: "0.3em"
         }} 
-        sucursal = {{
-          name: sucursalName,
-          id: sucursalId
-        }}/>
+        sucursal = {sucursal}/>
         )
     }
     return null
@@ -53,34 +51,26 @@ const IndexPage = () => {
  <Box>
    <Grid  container spacing={2}>
      {
-      data && data.sucursales.data.map(({
-        name,
-        capacidadMaxima,
-        localizacion,
-        encargado: {
-          name: encargadoName
-        },
-        id
-      }) => (
-        <Grid item xs={12} sm={6} md={4} lg={3} key={id}>
+      data && data.sucursales.data.map(sucursal => (
+        <Grid item xs={12} sm={6} md={4} lg={3} key={sucursal.id}>
           <Card >
             <CardContent sx={{
               position: "relative"
             }}>
               <Typography gutterBottom variant="h5" component="div">
-                {name}
+                {sucursal.name}
               </Typography>
               
-              {renderSettings(encargadoName, name, id)}
+              {renderSettings(sucursal)}
 
               <Typography variant="body2" color="text.secondary">
-                Capacidad máxima: {capacidadMaxima} <br/>
-                Localización: {localizacion} <br/>
-                Encargado: {encargadoName} <br/>
+                Capacidad máxima: {sucursal.capacidadMaxima} <br/>
+                Localización: {sucursal.localizacion} <br/>
+                Encargado: {sucursal.encargado.name} <br/>
               </Typography>
             </CardContent>
             <CardActions>
-              <Link href={`/sucursal/${id}`}>
+              <Link href={`/sucursal/${sucursal.id}`}>
                 <Button component="a" size="small">Visitar</Button>
               </Link>
             </CardActions>
