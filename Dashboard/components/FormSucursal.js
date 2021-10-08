@@ -34,20 +34,40 @@ export default function FormSucursal({idSucursal, handleClose }) {
   const {setAlert} = useContext(AlertContext)
   const [addSucursal] = useMutation(ADD_SUCURSAL,{
     update(cache, {data}) {
+      const newSucursalData = data.addSucursal.data
+      const newSucursal = cache.writeFragment({
+        id: cache.identify(newSucursalData),
+        fragment: gql`
+          fragment MySucursal on Sucursal{
+            id
+            name
+            capacidadMaxima
+            localizacion
+            encargado {
+              id
+              name
+            }
+          }
+        `,
+        data: newSucursalData
+      })
       cache.modify({
         fields: {
           sucursales(existingSucursales) {
-            if(data.addSucursal.data){
-              return [...existingSucursales.data, data.addSucursal.data]
-            }
+            const incomingSucursales = {...existingSucursales}
+            if(newSucursal) incomingSucursales.data = [...existingSucursales.data, newSucursal ]
+            return incomingSucursales
           },
-          me(me){
-            if(data.addSucursal.data && data.addSucursal.data.encargado.id === me.data.id){
-              return [...me.data.sucursales, data.addSucursal.data]
-            }
-          }
         }
       });
+      cache.modify({
+        id: cache.identify(newSucursalData.encargado),
+        fields: {
+          sucursales(existingSucursales){
+            return [...existingSucursales, newSucursal]
+          }
+        }
+      })
     }
   });
   const {
