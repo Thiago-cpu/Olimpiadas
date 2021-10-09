@@ -4,26 +4,8 @@ import { useQuery, gql } from '@apollo/client'
 import Settings from '../components/settings'
 import { useContext } from 'react'
 import UserContext from "../context/userContext";
+import { SUCURSALES } from '../gql/queries/sucursales'
 
-const SUCURSALES = gql`
-query Sucursales {
-  sucursales {
-    errors {
-      message
-      field
-    }
-    data {
-      id
-      name
-      capacidadMaxima
-      localizacion
-      encargado {
-        id
-        name
-      }
-    }
-  }
-}`
 
 const IndexPage = () => {
   const { loading, error, data } = useQuery(SUCURSALES)

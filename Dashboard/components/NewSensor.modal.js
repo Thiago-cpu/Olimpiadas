@@ -20,24 +20,7 @@ import QrScanner from "./QrScanner.modal";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import AlertContext from "../context/alertContext";
-
-
-const ADD_SENSOR = gql`
-  mutation AddSensor(
-    $addSensorData: sensorInput!
-    $addSensorSucursalId: String!
-  ) {
-    addSensor(data: $addSensorData, sucursalId: $addSensorSucursalId) {
-      data {
-        type
-      }
-      errors{
-        field
-        message
-      }
-    }
-  }
-`;
+import { ADD_SENSOR } from "../gql/mutations/addSensor";
 
 export default function NewSensor({ sucursalName = "Sucursal", id = "" }) {
   const {setAlert} = React.useContext(AlertContext)

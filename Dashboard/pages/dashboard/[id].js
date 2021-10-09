@@ -29,47 +29,10 @@ import userContext from "../../context/userContext";
 import { useSubscription, gql, useQuery, useLazyQuery } from "@apollo/client";
 import EntriesByDate from "../../components/entriesByDate";
 import {useRouter} from "next/router";
-
-
-const SUBSCRIPTION = gql`
-  subscription actualPeople($actualPeopleSucursalId: String!) {
-    actualPeople(sucursalId: $actualPeopleSucursalId) {
-      id
-      createdAt
-      cantidadActual
-      sucursal {
-        id
-        capacidadMaxima
-      }
-    }
-  }
-`;
-const GET_MY_SUCURSALES = gql`
-  query MySucursals {
-    me {
-      data {
-        sucursales {
-          id
-          name
-          capacidadMaxima
-          localizacion
-        }
-      }
-    }
-  }
-`;
-
-const MOVIMIENTOS = gql`
-  query movesByDate($movesDia: DateTime!, $sucursalId: String!) {
-    moves(dia: $movesDia, sucursalId: $sucursalId) {
-      data {
-        id
-        createdAt
-        cantidadActual
-      }
-    }
-  }
-`;
+import { GET_MY_SUCURSALES } from "../../gql/queries/MySucursales";
+import { MOVIMIENTOS } from "../../gql/queries/movesByDate";
+import { SUBSCRIPTION } from "../../gql/subscriptions/actualMoves";
+import { LAST_MOVE } from "../../gql/queries/lastMove";
 
 export default function DashBoard({ id, initialData }) {
   const router = useRouter();
@@ -88,6 +51,7 @@ export default function DashBoard({ id, initialData }) {
   const { data: subData } = useSubscription(SUBSCRIPTION, {
     variables: { actualPeopleSucursalId: id },
     onSubscriptionData: ({client, subscriptionData}) => {
+      if(subscriptionData.data.errors) return
       const move = subscriptionData.data.actualPeople
 
       const newMove = {
@@ -111,7 +75,6 @@ export default function DashBoard({ id, initialData }) {
       })
     }
   });
-
   const { user } = useContext(userContext);
 
   
@@ -271,28 +234,12 @@ export default function DashBoard({ id, initialData }) {
   );
 }
 
-const GET_INITIAL_DATA = gql`
-  query lastMove($lastMoveSucursalId: String!) {
-    lastMove(sucursalId: $lastMoveSucursalId) {
-      data {
-        sucursal {
-          capacidadMaxima
-        }
-        cantidadActual
-      }
-      errors {
-        message
-      }
-    }
-  }
-`;
-
 export async function getServerSideProps({ params }) {
   const { id } = params;
 
   const client = initializeApollo();
   const { data: initialData } = await client.query({
-    query: GET_INITIAL_DATA,
+    query: LAST_MOVE,
     variables: {
       lastMoveSucursalId: id,
     },

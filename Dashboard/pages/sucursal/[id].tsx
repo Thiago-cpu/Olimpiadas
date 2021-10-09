@@ -4,6 +4,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { gql, useSubscription } from "@apollo/client";
 import { initializeApollo, addApolloState } from "../../lib/apolloClient";
 import Link from 'next/link'
+import { LAST_MOVE } from "../../gql/queries/lastMove";
 
 const SUBSCRIPTION = gql`
   subscription actualPeople($actualPeopleSucursalId: String!) {
@@ -89,28 +90,12 @@ export default function Ingreso({ id, initialData }) {
   );
 }
 
-const GET_INITIAL_DATA = gql`
-  query lastMove($lastMoveSucursalId: String!) {
-    lastMove(sucursalId: $lastMoveSucursalId) {
-      data {
-        sucursal {
-          capacidadMaxima
-        }
-        cantidadActual
-      }
-      errors {
-        message
-      }
-    }
-  }
-`;
-
 export async function getServerSideProps({ params }) {
   const { id } = params;
 
   const client = initializeApollo();
   const { data: initialData } = await client.query({
-    query: GET_INITIAL_DATA,
+    query: LAST_MOVE,
     variables: {
       lastMoveSucursalId: id,
     },
