@@ -21,7 +21,6 @@ const arFormat = new Intl.DateTimeFormat("es-AR", {
 const format = (timestamp) => arFormat.format(new Date(timestamp));
 
 export default function Metrics({ dateSelected, capacidadMaxima, id }) {
-  if (!dateSelected || loading) return <CircularProgress />;
   const [getMoves, { called, data: moveData, loading, refetch }] =
     useLazyQuery(MOVIMIENTOS);
   const [chartData, setChartData] = useState([]);
@@ -61,6 +60,7 @@ export default function Metrics({ dateSelected, capacidadMaxima, id }) {
   return (
     <Card sx={{ flexBasis: "100%", flexGrow: 1 }}>
       <CardContent sx={{ textAlign: "center" }}>
+        {loading && <CircularProgress/>}
         {!chartData.length ? (
           <Typography variant="h6">No hay datos para mostrar</Typography>
         ) : (

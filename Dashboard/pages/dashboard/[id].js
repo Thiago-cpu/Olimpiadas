@@ -61,7 +61,7 @@ export default function DashBoard({ id, initialData }) {
 
       <StatusActual id={id} capacidadMaxima={capacidadMaxima}  initialData = {initialData} handleCapacidadMaxima={handleCapacidadMaxima} />
       
-      <Metrics id={id} dateSelected={dateSelected} capacidadMaxima={capacidadMaxima}/>
+      {dateSelected && <Metrics id={id} dateSelected={dateSelected} capacidadMaxima={capacidadMaxima}/>}
 
     </Box>
   );

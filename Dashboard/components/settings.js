@@ -19,37 +19,15 @@ import USure from "./USure.modal";
 import AlertContext from '../context/alertContext';
 import UserContext from "../context/userContext";
 import { REMOVE_SUCURSAL } from "../gql/mutations/removeSucursal";
+import DeleteSucursal from "./DeleteSucursal";
 
 export default function Settings({ sx = {}, sucursal }) {
   if(!sucursal) return "se necesita sucursal"
   const {setAlert} = useContext(AlertContext)
   const {user} = useContext(UserContext)
   const [open, setOpen] = useState(false);
-  const [menuItemSelected, setMenuItemSelected] = useState("");
-  const [removeSucursal] = useMutation(REMOVE_SUCURSAL,{
-    update(cache) {
-      cache.modify({
-        fields: {
-          sucursales(existingSucursales, {readField}) {
-            const incomingSucursales = {...existingSucursales}
-            incomingSucursales.data = existingSucursales.data.filter((existSucursal) => readField("id", existSucursal) !== sucursal.id);
-            return incomingSucursales
-          }
-        }
-      });
 
-      cache.modify({
-        id: cache.identify(sucursal.encargado),
-        fields: {
-          sucursales(existingSucursales, {readField}){
-            return existingSucursales.filter(existSucursal => readField("id",existSucursal) !== sucursal.id)
-          }
-        }
-      })
-    }
-  })
   const settingsRef = useRef(null);
-
 
   const handleMenuListToggle = () => {
     setOpen(true);
@@ -58,26 +36,6 @@ export default function Settings({ sx = {}, sucursal }) {
   const handleMenuListClose = () => {
     setOpen(false);
   };
-
-  const handleMenuItemClick = (e) => {
-    setMenuItemSelected(e.target.childNodes[0].textContent);
-  };
-
-  const handleAgree = async() => {
-    handleMenuListClose()
-    const {data, errors} = await removeSucursal({variables: {sucursalId: sucursal.id}})
-    if(errors || !data.deleteSucursal){
-      setAlert({
-        severity: "error",
-        text: "Algo ha ido mal"
-      })
-    } else {
-      setAlert({
-        severity: "success",
-        text: `${sucursal.name} ha sido eliminado correctamente`
-      })
-    }
-  }
 
   return (
     <>
@@ -106,24 +64,12 @@ export default function Settings({ sx = {}, sucursal }) {
                 <MenuList id="split-button-menu">
                   <Link href={`/dashboard/${sucursal.id}`}>
                     <MenuItem
-                      selected={"Métricas" === menuItemSelected}
-                      onClick={handleMenuItemClick}
                     >
                       Métricas
                     </MenuItem>
                   </Link>
                   {user.role === 'Admin'? <Divider /> &&
-                  <USure clave={sucursal.name} handleAgree={handleAgree}>
-                    <MenuItem
-                      selected={"Borrar" === menuItemSelected}
-                      onClick={handleMenuItemClick}
-                      sx={{
-                        color: "rgb(244, 67, 54)",
-                      }}
-                    >
-                      Borrar
-                    </MenuItem>
-                  </USure>
+                  <DeleteSucursal sucursal={sucursal} onClick={handleMenuListClose}/>
                   :null
                   }
 
