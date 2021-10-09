@@ -61,10 +61,12 @@ export default function DashBoard({ id, initialData }) {
         createdAt: move.createdAt,
       }
       
+      const date = new Date(move.createdAt)
+      date.setHours(0,0,0,0)
       client.writeQuery({
         query: MOVIMIENTOS,
         variables: {
-          movesDia: move.createdAt,
+          movesDia: date.toISOString(),
           sucursalId: move.sucursal.id
         },
         data:{
@@ -92,6 +94,7 @@ export default function DashBoard({ id, initialData }) {
   const onDateClick = (rowSelected) => {
     const fecha = rowSelected.fecha
     setDateSelected(new Intl.DateTimeFormat('es-AR', {dateStyle: "long"}).format(new Date(fecha)))
+    console.log(fecha)
     if(!called){
       getMoves({variables: {sucursalId: id, movesDia: fecha}})
     }else {

@@ -61,7 +61,7 @@ function createApolloClient() {
                 }
             },
             moves:{
-              keyArgs: ["sucursalId"],
+              keyArgs: ["sucursalId", "dia"],
               merge(existing = {data: []}, incoming, {readField}) {
                 const newObject = {...existing}
                 if(!existing.data[0]){
