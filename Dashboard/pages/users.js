@@ -22,13 +22,12 @@ import { gql, useQuery, useMutation } from '@apollo/client';
 import NewSucursal from '../components/NewSucursal.modal';
 import Search from '../components/Search';
 import AlertContext from '../context/alertContext';
-import { initializeApollo } from '../lib/apolloClient';
 import DeleteUser from '../components/DeleteUser';
 import { CHANGE_ROLE } from '../gql/mutations/changeRole';
 import { GET_USERS } from '../gql/queries/users';
 
 export default function UsersTable() {
-  const {data, loading, error} = useQuery(GET_USERS)
+  const {data, loading, error, client} = useQuery(GET_USERS)
   const arrRows = data?.allUser?.data
   const {setAlert} = React.useContext(AlertContext)
   const [rows, setRows] = React.useState(arrRows)
@@ -49,8 +48,8 @@ export default function UsersTable() {
         text: "Algo ha ido mal"
       })
     } else {
-      initializeApollo().writeFragment({
-        id: initializeApollo().cache.identify(user),
+      client.writeFragment({
+        id: client.cache.identify(user),
         fragment: gql`
           fragment MyUser on User {
             role
