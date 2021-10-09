@@ -6,6 +6,7 @@ export const SUBSCRIPTION = gql`
       id
       createdAt
       cantidadActual
+      type
       sucursal {
         id
         capacidadMaxima

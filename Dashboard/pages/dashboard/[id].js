@@ -33,6 +33,7 @@ import { GET_MY_SUCURSALES } from "../../gql/queries/MySucursales";
 import { MOVIMIENTOS } from "../../gql/queries/movesByDate";
 import { SUBSCRIPTION } from "../../gql/subscriptions/actualMoves";
 import { LAST_MOVE } from "../../gql/queries/lastMove";
+import { ENTRIES_BY_DATE } from "../../gql/queries/entriesByDate";
 
 export default function DashBoard({ id, initialData }) {
   const router = useRouter();
@@ -75,6 +76,39 @@ export default function DashBoard({ id, initialData }) {
           }
         }
       })
+      if(move.type === 'Ingreso'){
+        const { entriesByDate } = client.readQuery({
+          query: ENTRIES_BY_DATE,
+          variables: {
+            sucursalId: move.sucursal.id,
+            movesDia: date.toISOString()
+          }
+        })
+        if(entriesByDate.data[0].fecha === date.toISOString()){
+
+          const entryFrag = gql`
+            fragment myEntry on entriesOfDate{
+              id
+              entries
+              fecha
+            }
+          `
+
+          const entry = client.readFragment({
+            id: `${entriesByDate.data[0].__typename}:${entriesByDate.data[0].id}`,
+            fragment: entryFrag
+          })
+
+          const newEntry = {...entry}
+          newEntry.entries = newEntry.entries + 1
+
+          client.writeFragment({
+            id: `${entriesByDate.data[0].__typename}:${entriesByDate.data[0].id}`,
+            fragment: entryFrag,
+            data: newEntry
+          })
+        }
+      }
     }
   });
   const { user } = useContext(userContext);
@@ -94,7 +128,6 @@ export default function DashBoard({ id, initialData }) {
   const onDateClick = (rowSelected) => {
     const fecha = rowSelected.fecha
     setDateSelected(new Intl.DateTimeFormat('es-AR', {dateStyle: "long"}).format(new Date(fecha)))
-    console.log(fecha)
     if(!called){
       getMoves({variables: {sucursalId: id, movesDia: fecha}})
     }else {
