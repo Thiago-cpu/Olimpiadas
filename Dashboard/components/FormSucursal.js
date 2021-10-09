@@ -10,30 +10,13 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useMutation, gql } from "@apollo/client";
 import { useContext } from "react";
-const ADD_SUCURSAL = gql`
-  mutation AddSucursalMutation($addSucursalData: sucursalInput!) {
-    addSucursal(data: $addSucursalData) {
-      data {
-        id
-        name
-        capacidadMaxima
-        localizacion
-        encargado {
-          id
-          name
-        }
-      }
-      errors{
-        field
-        message
-      }
-    }
-  }
-`;
+import { ADD_SUCURSAL } from "../gql/mutations/addSucursal";
+
 export default function FormSucursal({idSucursal, handleClose }) {
   const {setAlert} = useContext(AlertContext)
   const [addSucursal] = useMutation(ADD_SUCURSAL,{
     update(cache, {data}) {
+      if(data.addSucursal.errors) return
       const newSucursalData = data.addSucursal.data
       const newSucursal = cache.writeFragment({
         id: cache.identify(newSucursalData),

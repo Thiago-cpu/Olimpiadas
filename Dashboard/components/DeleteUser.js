@@ -4,15 +4,9 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { useContext } from "react";
 import AlertContext from "../context/alertContext";
 import USure from "./USure.modal"
-const REMOVE_USER = gql`
-  mutation DeleteUserMutation($userId: String!) {
-  deleteUser(id: $userId)
-}
-`
-
+import { REMOVE_USER } from "../gql/mutations/removeUser";
 
 export default function DeleteUser({user}){
-
   const {setAlert} = useContext(AlertContext)
   const [removeUser, {loading: removeLoading}] = useMutation(REMOVE_USER, {
     update(cache) {

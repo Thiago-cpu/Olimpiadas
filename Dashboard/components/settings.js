@@ -18,12 +18,7 @@ import {gql, useMutation} from '@apollo/client'
 import USure from "./USure.modal";
 import AlertContext from '../context/alertContext';
 import UserContext from "../context/userContext";
-
-const REMOVE_SUCURSAL = gql`
-  mutation DeleteSucursal($sucursalId: String!) {
-    deleteSucursal(id: $sucursalId)
-  }
-`
+import { REMOVE_SUCURSAL } from "../gql/mutations/removeSucursal";
 
 export default function Settings({ sx = {}, sucursal }) {
   if(!sucursal) return "se necesita sucursal"

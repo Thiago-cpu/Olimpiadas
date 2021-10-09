@@ -21,44 +21,8 @@ import {
 import { gql, useQuery, useMutation } from "@apollo/client";
 import Search from "../components/Search";
 import CreateRow from "../components/rowUpdateSucursal";
-
-const GET_MY_SUCURSALES = gql`
-  query MySucursals {
-    me {
-      data {
-        id
-        sucursales {
-          id
-          name
-          capacidadMaxima
-          localizacion
-        }
-      }
-    }
-  }
-`;
-
-const UPDATE_SUCURSAL = gql`
-  mutation UpdateMySucursal(
-    $updateMySucursalSucursalId: String!
-    $updateMySucursalData: updateSucursalInput!
-  ) {
-    updateMySucursal(
-      sucursalId: $updateMySucursalSucursalId
-      data: $updateMySucursalData
-    ) {
-      data {
-        name
-        capacidadMaxima
-        localizacion
-        id
-      }
-      errors {
-        message
-      }
-    }
-  }
-`;
+import { UPDATE_SUCURSAL } from "../gql/mutations/updateSucursal";
+import { GET_MY_SUCURSALES } from "../gql/queries/MySucursales";
 
 export default function UsersTable() {
   const { data, loading, error } = useQuery(GET_MY_SUCURSALES);

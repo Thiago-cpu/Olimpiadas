@@ -22,27 +22,7 @@ import { setCookie } from "nookies";
 import UserContext from "../context/userContext";
 import NextLink from "next/link";
 import AlertContext from "../context/alertContext";
-
-const LOGIN_MUTATION = gql`
-  mutation Login($loginData: userInput!) {
-    login(data: $loginData) {
-      authToken
-      data {
-        id
-        name
-        role
-        sucursales {
-          name
-          id
-        }
-      }
-      errors {
-        field
-        message
-      }
-    }
-  }
-`;
+import { LOGIN_MUTATION } from '../gql/mutations/login'
 
 export default function Login() {
   const { setAlert } = useContext(AlertContext);

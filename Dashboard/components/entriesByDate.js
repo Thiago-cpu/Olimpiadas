@@ -3,6 +3,7 @@ import { DataGrid } from "@mui/x-data-grid";
 import { Paper, Typography } from "@mui/material";
 import gql from "graphql-tag";
 import { useQuery } from "@apollo/client";
+import { ENTRIES_BY_DATE } from "../gql/queries/entriesByDate";
 
 const columns = [
   {
@@ -21,26 +22,6 @@ const columns = [
     align: "right"
   }
 ];
-
-const ENTRIES_BY_DATE = gql`
-  query entriesByDate(
-    $limit: Int
-    $sucursalId: String!
-    $skip: Int
-  ) {
-    entriesByDate(
-      take: $limit
-      sucursalId: $sucursalId
-      skip: $skip
-    ){
-      data {
-        id
-        entries
-        fecha
-      }
-    }
-  }
-`;
 
 export default function ServerPaginationGrid({ onDateClick, sucursalId }) {
   const { loading, data, fetchMore } = useQuery(ENTRIES_BY_DATE, {

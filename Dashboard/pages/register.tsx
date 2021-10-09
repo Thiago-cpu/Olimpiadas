@@ -21,20 +21,7 @@ import Router from "next/router";
 import AlertContext from "../context/alertContext";
 import NextLink from "next/link";
 import Head from "next/head";
-
-const REGISTER = gql`
-  mutation Register($registerData: userInput!) {
-    register(data: $registerData) {
-      errors {
-        field
-        message
-      }
-      data {
-        name
-      }
-    }
-  }
-`;
+import { REGISTER } from "../gql/mutations/register";
 
 export default function Register() {
   const { setAlert } = useContext(AlertContext);
