@@ -3,7 +3,6 @@ import {
   Tooltip,
   Icon,
   IconButton,
-  Box,
   Popper,
   Grow,
   MenuItem,
@@ -14,12 +13,10 @@ import {
 } from "@mui/material";
 import Link from "next/link";
 import { useContext, useRef, useState } from "react";
-import {gql, useMutation} from '@apollo/client'
-import USure from "./USure.modal";
 import AlertContext from '../context/alertContext';
 import UserContext from "../context/userContext";
-import { REMOVE_SUCURSAL } from "../gql/mutations/removeSucursal";
 import DeleteSucursal from "./DeleteSucursal";
+import UpdateSucursal from "./UpdateSucursal.modal";
 
 export default function Settings({ sx = {}, sucursal }) {
   if(!sucursal) return "se necesita sucursal"
@@ -36,6 +33,11 @@ export default function Settings({ sx = {}, sucursal }) {
   const handleMenuListClose = () => {
     setOpen(false);
   };
+
+  const deleteSucursalRender = () => 
+  user.role === 'Admin'
+  ? <Divider /> &&<DeleteSucursal sucursal={sucursal} onClick={handleMenuListClose}/>
+  :null;
 
   return (
     <>
@@ -63,16 +65,16 @@ export default function Settings({ sx = {}, sucursal }) {
               <ClickAwayListener onClickAway={handleMenuListClose}>
                 <MenuList id="split-button-menu">
                   <Link href={`/dashboard/${sucursal.id}`}>
-                    <MenuItem
-                    >
+                    <MenuItem>
                       Métricas
                     </MenuItem>
                   </Link>
-                  {user.role === 'Admin'? <Divider /> &&
-                  <DeleteSucursal sucursal={sucursal} onClick={handleMenuListClose}/>
-                  :null
-                  }
-
+                  <UpdateSucursal sucursal={sucursal}>
+                    <MenuItem>
+                      Editar
+                    </MenuItem>
+                  </UpdateSucursal>
+                  {deleteSucursalRender()}
                 </MenuList>
               </ClickAwayListener>
             </Paper>

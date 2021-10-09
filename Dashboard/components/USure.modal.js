@@ -14,8 +14,6 @@ import * as Yup from 'yup'
 export default function USure({ clave, handleAgree, children }) {
   if(!handleAgree || !clave || !children) return "faltan parametros"
   const [open, setOpen] = useState(false);
-  const [value, setValue] = useState('')
-
 
   const handleClickOpen = () => {
     setOpen(true);
