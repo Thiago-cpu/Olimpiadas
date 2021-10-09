@@ -3,7 +3,7 @@ import { DataGrid } from "@mui/x-data-grid";
 import { Paper, Typography } from "@mui/material";
 import gql from "graphql-tag";
 import { useQuery } from "@apollo/client";
-import { ENTRIES_BY_DATE } from "../gql/queries/entriesByDate";
+import { ENTRIES_BY_DATE } from "../../gql/queries/entriesByDate";
 
 const columns = [
   {
@@ -41,7 +41,9 @@ export default function ServerPaginationGrid({ onDateClick, sucursalId }) {
       const allRows = data.entriesByDate.data
       if(allRows[page*5]){
         const newRows = allRows.slice(page*5, (page+1)*5)
-        onDateClick(newRows[0])
+        if(!rows[0] || newRows[0].fecha !== rows[0].fecha){
+          onDateClick(newRows[0])
+        }
         setRows(newRows)
       } else {
         fetchMore({
