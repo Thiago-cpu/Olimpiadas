@@ -12,9 +12,8 @@ import SaveIcon from '@mui/icons-material/Save';
 import StorefrontIcon from "@mui/icons-material/Storefront";
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import NewSensor from "../components/NewSensor.modal";
-import { useFormik } from "formik";
-import * as Yup from "yup";
 import AlertContext from "../context/alertContext";
+import useUpdateSucursal from "../hooks/useUpdateSucursal";
 
 export default function CreateRow({row, i, rowsEdits, makeRowEditable, updateSucursal, handleParentSubmit}){
   const {setAlert} = React.useContext(AlertContext)
@@ -26,56 +25,7 @@ export default function CreateRow({row, i, rowsEdits, makeRowEditable, updateSuc
     errors,
     touched,
     isSubmitting,
-  } = useFormik({
-    initialValues: {
-      name: row.name,
-      capacidadMaxima: row.capacidadMaxima,
-      localizacion: row.localizacion
-    },
-    validationSchema: Yup.object({
-      name: Yup.string()
-        .required("Requerido")
-        .min(3, "Mínimo 3 caracteres")
-        .max(30, "Máximo 30 caracteres"),
-      capacidadMaxima: Yup.number()
-        .required("Requerido")
-        .positive("Debería de ser un numero postivo")
-        .integer("Debería de ser un entero"),
-      localizacion: Yup.string()
-        .required("Requerido")
-        .min(10, "Mínimo 10 caracteres")
-        .max(255, "Máximo 255 caracteres"),
-    }),
-    onSubmit: async (values) => {
-      try{
-          const { data } = await updateSucursal({
-              variables: {
-                updateMySucursalSucursalId: row.id,
-                updateMySucursalData: {
-                      ...values
-                  },
-              },
-          })
-          const {updateMySucursal} = data
-          const {errors, data:sucursal} = updateMySucursal
-          if(errors){
-            setAlert({
-              severity: "error",
-              text: errors[0].message
-            })
-          } else {
-            setAlert({
-              severity: "success",
-              text: `La sucursal ${sucursal.name} fue actualizada correctamente`
-            })
-            handleParentSubmit(sucursal)
-          }
-      }
-      catch(e){
-          console.log(e)
-      }
-  }
-  });
+  } = useUpdateSucursal(row, handleParentSubmit)
   return (
     <TableRow
     sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
