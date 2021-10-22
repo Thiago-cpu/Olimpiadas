@@ -59,10 +59,11 @@ export default function Register() {
     }),
     onSubmit: async (values) => {
       try {
+        const { passwordConfirm, ...apiValues} = values
         const { data, errors } = await register({
           variables: {
             registerData: {
-              ...values,
+              ...apiValues,
             },
           },
         });
