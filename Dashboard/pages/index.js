@@ -35,7 +35,9 @@ const IndexPage = () => {
      {
       data && data.sucursales.data.map(sucursal => (
         <Grid item xs={12} sm={6} md={4} lg={3} key={sucursal.id}>
-          <Card >
+          <Card sx={{
+            overflow: "inherit"
+          }} >
             <CardContent sx={{
               position: "relative"
             }}>
